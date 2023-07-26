@@ -1,4 +1,4 @@
-[# UniDbg
+# UniDbg
 
 An interactive command line debugger for unicorn.
 
