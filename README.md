@@ -1,4 +1,4 @@
-# UniDbg
+[# UniDbg
 
 An interactive command line debugger for unicorn.
 
@@ -13,7 +13,7 @@ Dependencies:
 
 ​       
 
-## Usage
+## Basic Usage
 
 Start the debugger:
 ```bash
@@ -137,4 +137,40 @@ Or read all registers:
 ```
 
 
+## Advanced Usage
 
+### init_script
+
+You can load an init script at startup, and in that script file you can write some init commands that will be executed automatically at the beginning.
+
+init_script:
+```
+help
+load /your/path/libdemo.so
+mem_list
+mem_read 0x38550 0x10
+mem_read 0xF9068 0x08
+mem_read 0xFDC80 0x08
+```
+
+Then pass it in as a parameter on startup:
+```
+> unidbg init_script
+UniDbg 0.0.1
+Type "help" for more information.
+load init script file `init_script`
+>>> load /your/path/libdemo.so
+Map memory reserve address space [0x1000000 - 0x10fe000]
+Map memory from file [0x0 - 0xe396c] to virtual memory [0x1000000 - 0x10e396c]
+Map memory from file [0xe3000 - 0xe9110] to virtual memory [0x10f3000 - 0x10f9110]
+Fill memory with zeros to align with page size [0x10f9110 - 0x10fa000]
+Fill memory with zeros for .bss section [0x10fa000 - 0x10fd000]
+>>> mem_list
+[0x01000000 - 0x010fe000) RWE
+>>> mem_read 0x38550 0x10
+0x00038550  10 06 00 90 11 8E 45 F9  10 62 2C 91 20 02 1F D6  |......E..b,. ...|
+>>> mem_read 0xF9068 0x08
+0x000f9068  A0 D4 0F 00 00 00 00 00                           |........        |
+>>> mem_read 0xFDC80 0x08
+0x000fdc80  00 00 00 00 00 00 00 00                           |........        |
+```

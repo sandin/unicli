@@ -6,14 +6,17 @@ from .command import CMD_RESULT_EXIT
 from .command.cmd_exit import cmd_exit
 from .command.cmd_help import cmd_help
 from .command.cmd_load import cmd_load
+from .command.cmd_mem_list import cmd_mem_list
+from .command.cmd_mem_read import cmd_mem_read
 from .util import register_cmd, parse_init_script
 from .util.args_parser import parse_arg
-from .executor.executor import Executor
 
 g_all_commands = {}
 register_cmd(g_all_commands, "exit", ".exit", "exit()", "e", handler=cmd_exit)
 register_cmd(g_all_commands, "help", "h", handler=cmd_help)
 register_cmd(g_all_commands, "load", "l", handler=cmd_load)
+register_cmd(g_all_commands, "mem_list",  "ml", handler=cmd_mem_list)
+register_cmd(g_all_commands, "mem_read",  "mr", handler=cmd_mem_read)
 
 
 def main():
@@ -26,9 +29,9 @@ def main():
         if not os.path.exists(init_script):
             print("warning: %s init script file is not exists")
         init_cmds += parse_init_script(init_script)
-        print("load init script", init_script, init_cmds)
+        print("load init script file `%s`" % init_script)
 
-    context = {}
+    context = {'executor': None, 'base_addr': 0, 'state': 0}
     while True:
         if len(init_cmds) > 0:
             line = init_cmds[0]

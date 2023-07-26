@@ -34,9 +34,11 @@ def cmd_load(context, line):
     context['executor'] = UnicornExecutor(arch)
 
     # Load ELF/PE/Mach-O file into virtual memory
-    ret, err = loader.load(context['executor'], filename)
-    if not ret:
+    loaded_info, err = loader.load(context['executor'], filename)
+    if err is not None:
         print("Error: can not load %s, %s" % (filename, err))
         return CMD_RESULT_FAILED
+    context['base_addr'] = loaded_info.load_bias
+    context['state'] = 1
 
     return CMD_RESULT_OK

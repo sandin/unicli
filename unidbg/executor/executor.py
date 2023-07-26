@@ -22,7 +22,7 @@ class Executor(object):
     Interface Executor
     """
 
-    def mem_map(self, address: int, size: int, perms: MemoryPerm):
+    def mem_map(self, address: int, size: int, perms: MemoryPerm) -> (int, str):
         """
         Map memory at address
         :param address: start address
@@ -32,7 +32,7 @@ class Executor(object):
         """
         pass
 
-    def mem_write(self, address: int, data: bytes):
+    def mem_write(self, address: int, data: bytes) -> (bool, str):
         """
         Write memory at address
         :param address: to writen
@@ -41,7 +41,15 @@ class Executor(object):
         """
         pass
 
-    def mem_protect(self, address: int, size: int, perms: MemoryPerm):
+    def mem_read(self, address: int, size: int) -> (bool, str):
+        """
+        Read memory at address
+        :param address: to read
+        :param size: size
+        :return: (success, error)
+        """
+
+    def mem_protect(self, address: int, size: int, perms: MemoryPerm) -> (bool, str):
         """
         Protect memory at address
         :param address: to protect
@@ -49,3 +57,12 @@ class Executor(object):
         :param perms: memory permissions
         :return: (success, error)
         """
+        pass
+
+    def mem_regions(self) -> (list, str):
+        """
+        List all mapped memory regions
+        :return: (memory list, error)
+        """
+        pass
+

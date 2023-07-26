@@ -5,7 +5,8 @@ command:
    load <filename>                      load an ELF/PE/Mach-O file
    mem_map <addr> <size> <port>         map a memory range
    mem_write <addr> <bytes>             write memory at address
-   mem_read <addr>                      read memory at address
+   mem_read <addr> <size>               read memory at address
+   mem_list                             list all mapped memory range
    reg_write <reg_name>                 write a register
    reg_read <reg_name>                  read a register
    hook_block <addr> <subcommand>       hook block at address
