@@ -24,13 +24,13 @@ Type "help" for more information.
 
 ​            
 
-Load an elf file into memory:
+Load an ELF/PE/Mach-O file into memory:
 
 ```bash
 >>> load /your/path/libdemo.so
 Load Success, base address: 0x10bb32000
 ```
-> NOTE: unidbg will map all LOAD sections in the ELF file to unicorn's virtual memory.
+> NOTE: unidbg will map all LOAD segments in the ELF file to unicorn's virtual memory.
 
 ​           
 
