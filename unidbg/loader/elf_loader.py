@@ -3,8 +3,8 @@ import sys
 import lief
 
 from .loader import Loader, LoadedInfo
-from ..executor.executor import Executor, MemoryPerm
-from ..util.memory import page_start, page_end, page_offset, PAGE_SIZE
+from unidbg.executor.executor import Executor, MemoryPerm
+from unidbg.util.memory import page_start, page_end, page_offset, PAGE_SIZE
 
 
 class ElfLoader(Loader):
@@ -37,7 +37,6 @@ class ElfLoader(Loader):
         loaded_info.load_bias = start - addr
 
         # LoadSegments
-
         with open(filename, "rb") as f:
             for segment in elf.segments:  # type: lief.ELF.Segment
                 if segment.type != lief.ELF.SEGMENT_TYPES.LOAD:
@@ -84,7 +83,6 @@ class ElfLoader(Loader):
                     if err is not None:
                         return None, "Can not write memory [0x%x - 0x%x], %s" % (seg_file_end, seg_file_end + len(zeros), err)
                     print("Fill memory with zeros for .bss section [0x%x - 0x%x]" % (seg_file_end, seg_file_end + len(zeros)))
-
         return loaded_info, None
 
     @staticmethod
@@ -108,5 +106,3 @@ class ElfLoader(Loader):
         min_vaddr = page_start(min_vaddr)
         max_vaddr = page_end(max_vaddr)
         return min_vaddr, max_vaddr
-
-

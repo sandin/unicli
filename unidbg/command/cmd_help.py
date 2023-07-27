@@ -1,4 +1,5 @@
 from .__init__ import CMD_RESULT_OK
+from unidbg.common.context import Context
 
 USAGE = """Usage: <command>
 command:
@@ -17,6 +18,6 @@ command:
 """
 
 
-def cmd_help(context, line):
+def cmd_help(context: Context, line: str) -> int:
     print(USAGE)
     return CMD_RESULT_OK

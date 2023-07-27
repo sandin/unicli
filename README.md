@@ -136,12 +136,15 @@ Or read all registers:
   x32(pc) = 0x10bb72844
 ```
 
+​        
 
 ## Advanced Usage
 
 ### init_script
 
 You can load an init script at startup, and in that script file you can write some init commands that will be executed automatically at the beginning.
+
+​        
 
 init_script:
 ```
@@ -153,7 +156,10 @@ mem_read 0xF9068 0x08
 mem_read 0xFDC80 0x08
 ```
 
+​          
+
 Then pass it in as a parameter on startup:
+
 ```
 > unidbg init_script
 UniDbg 0.0.1

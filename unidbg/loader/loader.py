@@ -1,4 +1,4 @@
-from ..executor.executor import Executor
+from unidbg.executor.executor import Executor
 
 
 class LoadedInfo(object):

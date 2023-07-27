@@ -1,13 +1,14 @@
 import os.path
 import sys
 from prompt_toolkit import prompt
+
 from .__init__ import __version__
 from .command import CMD_RESULT_EXIT
 from .command.cmd_exit import cmd_exit
 from .command.cmd_help import cmd_help
 from .command.cmd_load import cmd_load
-from .command.cmd_mem_list import cmd_mem_list
-from .command.cmd_mem_read import cmd_mem_read
+from .command.cmd_mem import cmd_mem_list, cmd_mem_read
+from .common.context import Context
 from .util import register_cmd, parse_init_script
 from .util.args_parser import parse_arg
 
@@ -31,7 +32,7 @@ def main():
         init_cmds += parse_init_script(init_script)
         print("load init script file `%s`" % init_script)
 
-    context = {'executor': None, 'base_addr': 0, 'state': 0}
+    context = Context()
     while True:
         if len(init_cmds) > 0:
             line = init_cmds[0]

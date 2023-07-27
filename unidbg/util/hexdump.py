@@ -15,4 +15,4 @@ def hexdump(buf, off=0):
         if bs != last_bs or line != last_line:
             print(line)
         last_bs, last_line = bs, line
-    print("0x{:08x}".format(off + len(buf)))
+    #print("0x{:08x}".format(off + len(buf)))
