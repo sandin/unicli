@@ -15,6 +15,7 @@ def tokenize(line: str, split_tokens: list[str], wrap_tokens: list[str], end_tok
         if not in_wrap and c in split_tokens:
             parts.append(last_part)
             last_part = ""
+            continue
         last_part += c
     if len(last_part) > 0:
         parts.append(last_part)

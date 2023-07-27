@@ -2,10 +2,11 @@ import os.path
 
 from .__init__ import CMD_RESULT_FAILED, CMD_RESULT_OK
 from unidbg.context import Context, State
-from unidbg.executor.executor import Arch
+from unidbg.arch.arch import Arch
 from unidbg.loader.elf_loader import ElfLoader
-from unidbg.util.file_format import get_file_format, FileFormat
+from unidbg.util.file_format import get_file_format, FileFormat, get_cpu_arch
 from unidbg.executor.unicorn_executor import UnicornExecutor
+from ..arch.arch_arm64 import ArchSpecArm64
 
 
 def cmd_load(context: Context, args: list[str]) -> int:
@@ -29,8 +30,15 @@ def cmd_load(context: Context, args: list[str]) -> int:
         print("Error: unsupported file format %s" % filename)
         return CMD_RESULT_FAILED
 
+    # Arch Spec helper
+    arch = get_cpu_arch(filename)
+    if arch == Arch.ARCH_ARM64:
+        context.arch = ArchSpecArm64()
+    else:
+        print("Error: unsupported arch %d" % arch)
+        return CMD_RESULT_FAILED
+
     # Create Unicorn Executor
-    arch = Arch.ARCH_ARM64  # TODO:
     context.executor = UnicornExecutor(arch)
 
     # Load ELF/PE/Mach-O file into virtual memory

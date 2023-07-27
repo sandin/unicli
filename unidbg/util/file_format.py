@@ -1,6 +1,8 @@
 from enum import IntEnum
 import lief
 
+from unidbg.arch.arch import Arch
+
 
 class FileFormat(IntEnum):
     UNKNOWN = 0
@@ -22,3 +24,7 @@ def get_file_format(filename: str) -> FileFormat:
     if lief.is_macho(filename):
         return FileFormat.MACH_O
     return FileFormat.UNKNOWN
+
+
+def get_cpu_arch(filename: str) -> Arch:
+    return Arch.ARCH_ARM64  # TODO: only support arm64 for now

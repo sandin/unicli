@@ -9,14 +9,6 @@ class MemoryPerm(IntEnum):
     PROT_ALL = 7
 
 
-class Arch(IntEnum):
-    ARCH_NONE = 0
-    ARCH_ARM = 1
-    ARCH_ARM64 = 2
-    ARCH_X86 = 3
-    ARCH_X86_64 = 4
-
-
 class Executor(object):
     """
     Interface Executor
@@ -66,3 +58,19 @@ class Executor(object):
         """
         pass
 
+    def reg_write(self, reg_num, value) -> (bool, str):
+        """
+        Write a value to the specified register
+        :param reg_num: target reg
+        :param value: value
+        :return: (success, error)
+        """
+        pass
+
+    def reg_read(self, reg_num) -> (int, str):
+        """
+        Read the value of the specified register
+        :param reg_num: target reg
+        :return: (value, error)
+        """
+        pass

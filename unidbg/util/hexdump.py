@@ -4,7 +4,7 @@ def hexdump(buf, off=0):
     last_bs, last_line = None, None
     for i in range(0, len(buf), 16):
         bs = bytearray(buf[i : i + 16])
-        line = "0x{:08x}  {:23}  {:23}  |{:16}|".format(
+        line = "0x{:0>10x}  {:23}  {:23}  |{:16}|".format(
             off + i,
             " ".join(("{:02X}".format(x) for x in bs[:8])),
             " ".join(("{:02X}".format(x) for x in bs[8:])),

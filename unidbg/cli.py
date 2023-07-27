@@ -8,7 +8,8 @@ from .command import CMD_RESULT_EXIT
 from .command.cmd_exit import cmd_exit
 from .command.cmd_help import cmd_help
 from .command.cmd_load import cmd_load
-from .command.cmd_mem import cmd_mem_list, cmd_mem_read
+from .command.cmd_mem import cmd_mem_list, cmd_mem_read, cmd_mem_map, cmd_mem_write
+from .command.cmd_reg import cmd_reg_write, cmd_reg_read
 from .command.cmd_script import cmd_script
 from .util import register_cmd, parse_init_script
 from .util.cmd_parser import parse_command
@@ -17,9 +18,13 @@ g_all_commands = {}
 register_cmd(g_all_commands, "exit", ".exit", "exit()", "e", handler=cmd_exit)
 register_cmd(g_all_commands, "help", "h", handler=cmd_help)
 register_cmd(g_all_commands, "load", "l", handler=cmd_load)
+register_cmd(g_all_commands, "script",  "s", handler=cmd_script)
 register_cmd(g_all_commands, "mem_list",  "ml", handler=cmd_mem_list)
 register_cmd(g_all_commands, "mem_read",  "mr", handler=cmd_mem_read)
-register_cmd(g_all_commands, "script",  "s", handler=cmd_script)
+register_cmd(g_all_commands, "mem_write",  "mr", handler=cmd_mem_write)
+register_cmd(g_all_commands, "mem_map",  "mm", handler=cmd_mem_map)
+register_cmd(g_all_commands, "reg_write",  "rw", handler=cmd_reg_write)
+register_cmd(g_all_commands, "reg_read",  "rr", handler=cmd_reg_read)
 
 
 def main():
@@ -38,9 +43,10 @@ def main():
         if len(context.padding_cmds) > 0:
             line = context.padding_cmds[0]
             del context.padding_cmds[0]
-            print(">>> %s" % line)
+            if line.strip():
+                print("%s %s" % (context.prompt, line))
         else:
-            line = prompt('>>> ')
+            line = prompt("%s " % context.prompt)
         if not line.strip():
             continue
         command = parse_command(line)

@@ -1,6 +1,8 @@
-from .executor import Executor, MemoryPerm, Arch
+from .executor import Executor, MemoryPerm
 from unicorn import *
 from unicorn.arm64_const import *
+
+from unidbg.arch.arch import Arch
 
 
 class UnicornExecutor(Executor):
@@ -17,7 +19,7 @@ class UnicornExecutor(Executor):
         try:
             if address == 0:
                 address = self._find_available_mem_range(size)
-            self._mu.mem_map(address, size) # FIXME: , self._map_perms(perms))
+            self._mu.mem_map(address, size, self._map_perms(perms))
             return address, None
         except UcError as e:
             return 0, e
@@ -65,12 +67,16 @@ class UnicornExecutor(Executor):
             last_addr = end
         return last_addr
 
+    def reg_write(self, reg_num, value) -> (bool, str):
+        try:
+            self._mu.reg_write(reg_num, value)
+            return True, None
+        except UcError as e:
+            return False, e
 
-
-
-
-
-
-
-
-
+    def reg_read(self, reg_num) -> (int, str):
+        try:
+            value = self._mu.reg_read(reg_num)
+            return value, None
+        except UcError as e:
+            return False, e
