@@ -21,5 +21,6 @@ capstone==5.0.0.post1
 lief==0.13.2
 prompt-toolkit==3.0.39
 unicorn==2.0.1.post1
+pytest==7.4.0
 '''.split('\n'),
   zip_safe=False)

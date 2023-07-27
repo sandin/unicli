@@ -1,7 +1,7 @@
 from unidbg.command import CMD_RESULT_FAILED, CMD_RESULT_OK
-from unidbg.common.context import Context, State
-from unidbg.executor.executor import Executor, MemoryPerm
-from unidbg.util.args_parser import parse_addr_arg, parse_int_arg
+from unidbg.context import Context, State
+from unidbg.executor.executor import MemoryPerm
+from unidbg.util.cmd_parser import parse_address, parse_number
 from unidbg.util.hexdump import hexdump
 
 
@@ -16,7 +16,7 @@ def perm_to_str(perm: MemoryPerm) -> str:
     return "".join(s)
 
 
-def cmd_mem_list(context: Context, line: str) -> int:
+def cmd_mem_list(context: Context, args: list[str]) -> int:
     if context.state != State.LOADED:
         print("invalid context state")
         return CMD_RESULT_FAILED
@@ -31,19 +31,27 @@ def cmd_mem_list(context: Context, line: str) -> int:
     return CMD_RESULT_OK
 
 
-def cmd_mem_read(context: Context, line: str) -> int:
+def cmd_mem_read(context: Context, args: list[str]) -> int:
     if context.state != State.LOADED:
         print("invalid context state")
         return CMD_RESULT_FAILED
 
-    address, line = parse_addr_arg(line, -1)
-    if address == -1:
+    if len(args) > 1:
         print("missing <addr> arg")
         return CMD_RESULT_FAILED
 
-    size, line = parse_int_arg(line, -1)
-    if size == -1:
+    address = parse_address(args[0], -1)
+    if address == -1:
+        print("invalid address format: %s" % args[0])
+        return CMD_RESULT_FAILED
+
+    if len(args) > 2:
         print("missing <size> arg")
+        return CMD_RESULT_FAILED
+
+    size = parse_number(args[1], -1)
+    if size == -1:
+        print("invalid number format: %s" % args[1])
         return CMD_RESULT_FAILED
 
     data, err = context.executor.mem_read(context.base_addr + address, size)

@@ -1,20 +1,19 @@
 import os.path
 
 from .__init__ import CMD_RESULT_FAILED, CMD_RESULT_OK
-from unidbg.common.context import Context, State
+from unidbg.context import Context, State
 from unidbg.executor.executor import Arch
-from unidbg.util.args_parser import parse_arg
 from unidbg.loader.elf_loader import ElfLoader
 from unidbg.util.file_format import get_file_format, FileFormat
 from unidbg.executor.unicorn_executor import UnicornExecutor
 
 
-def cmd_load(context: Context, line: str) -> int:
-    filename, _ = parse_arg(line)
-    if filename is None:
-        print("Error: missing arg <filename>")
+def cmd_load(context: Context, args: list[str]) -> int:
+    if len(args) < 1:
+        print("Error: missing <filename> arg")
         return CMD_RESULT_FAILED
 
+    filename = args[0]
     if not os.path.exists(filename):
         print("Error: `%s` file is not exists!" % filename)
         return CMD_RESULT_FAILED
