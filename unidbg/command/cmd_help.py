@@ -1,5 +1,6 @@
 from .__init__ import CMD_RESULT_OK
 from unidbg.context import Context
+from unidbg.util.cmd_parser import Command
 
 USAGE = """Usage: <command> <args..>
 command:
@@ -14,12 +15,13 @@ command:
    hook_code <rel_addr> <subcommand>        hook code at address
    emu_start <start_addr> <end_addr>        start new execution
    set_base_addr <abs_addr>                 set base address for all relative addresses
+   set <name> <value>                       set local variable
    script <filename>                        load script file
    help                                     print help information
    exit                                     exit program   
 """
 
 
-def cmd_help(context: Context, args: list[str]) -> int:
+def cmd_help(ctx: Context, cmd: Command) -> (int, str):
     print(USAGE)
-    return CMD_RESULT_OK
+    return CMD_RESULT_OK, None

@@ -1,8 +1,8 @@
 from unidbg.command import CMD_RESULT_FAILED, CMD_RESULT_OK
 from unidbg.context import Context, State
 from unidbg.executor.executor import MemoryPerm
-from unidbg.util.cmd_parser import parse_address, parse_number, parse_bytes
 from unidbg.util.hexdump import hexdump
+from unidbg.util.cmd_parser import Command
 
 
 def perm_to_str(perm: MemoryPerm) -> str:
@@ -16,119 +16,89 @@ def perm_to_str(perm: MemoryPerm) -> str:
     return "".join(s)
 
 
-def cmd_mem_list(context: Context, args: list[str]) -> int:
-    if context.state != State.LOADED:
-        print("invalid context state")
-        return CMD_RESULT_FAILED
+def cmd_mem_list(ctx: Context, cmd: Command) -> (int, str):
+    if ctx.state != State.LOADED:
+        return CMD_RESULT_FAILED, "invalid context state"
 
-    regions, err = context.executor.mem_regions()
+    regions, err = ctx.executor.mem_regions()
     if err is not None:
-        print("Error: can not read memory list, %s" % err)
-        return CMD_RESULT_FAILED
+        return CMD_RESULT_FAILED, "can not read memory list, %s" % err
 
     for start, end, prot in regions:
-        start_addr = context.arch.format_address(start)
-        end_addr = context.arch.format_address(end+1)
+        start_addr = ctx.arch.format_address(start)
+        end_addr = ctx.arch.format_address(end + 1)
         print("%s - %s %s" % (start_addr, end_addr, perm_to_str(prot)))
-    return CMD_RESULT_OK
+    return CMD_RESULT_OK, None
 
 
-def cmd_mem_read(context: Context, args: list[str]) -> int:
-    if context.state != State.LOADED:
-        print("invalid context state")
-        return CMD_RESULT_FAILED
+def cmd_mem_read(ctx: Context, cmd: Command) -> (int, str):
+    if ctx.state != State.LOADED:
+        return CMD_RESULT_FAILED, "invalid context state"
 
-    # <address>
-    if len(args) < 1:
-        print("missing <addr> arg")
-        return CMD_RESULT_FAILED
-    address = parse_address(args[0], -1)
-    if address == -1:
-        print("invalid address format: %s" % args[0])
-        return CMD_RESULT_FAILED
+    # <addr>
+    address, err = cmd.get_addr_arg("addr", 0, -1)
+    if err is not None:
+        return CMD_RESULT_FAILED, err
 
     # <size>
-    if len(args) < 2:
-        print("missing <size> arg")
-        return CMD_RESULT_FAILED
-    size = parse_number(args[1], -1)
-    if size == -1:
-        print("invalid number format: %s" % args[1])
-        return CMD_RESULT_FAILED
-
-    data, err = context.executor.mem_read(context.base_addr + address, size)
+    size, err = cmd.get_int_arg("size", 1, -1)
     if err is not None:
-        print("Error: can not read memory at 0x%x - 0x%x, %s" % (address, address + size, err))
-        return CMD_RESULT_FAILED
+        return CMD_RESULT_FAILED, err
+
+    data, err = ctx.executor.mem_read(ctx.base_addr + address, size)
+    if err is not None:
+        err = "can not read memory at 0x%x - 0x%x, %s" % (address, address + size, err)
+        return CMD_RESULT_FAILED, err
     hexdump(data, off=address)
-    return CMD_RESULT_OK
+    return CMD_RESULT_OK, None
 
 
-def cmd_mem_write(context: Context, args: list[str]) -> int:
-    if context.state != State.LOADED:
-        print("invalid context state")
-        return CMD_RESULT_FAILED
+def cmd_mem_write(ctx: Context, cmd: Command) -> (int, str):
+    if ctx.state != State.LOADED:
+        return CMD_RESULT_FAILED, "invalid context state"
 
-    # <address>
-    if len(args) < 1:
-        print("missing <addr> arg")
-        return CMD_RESULT_FAILED
-    address = parse_address(args[0], -1)
-    if address == -1:
-        print("invalid address format: %s" % args[0])
-        return CMD_RESULT_FAILED
+    # <addr>
+    address, err = cmd.get_addr_arg("addr", 0, -1)
+    if err is not None:
+        return CMD_RESULT_FAILED, err
 
     # <data>
-    if len(args) < 2:
-        print("missing <data> arg")
-        return CMD_RESULT_FAILED
-    data = parse_bytes(args[1])
-    if len(data) == 0:
-        print("invalid data format: %s" % args[1])
-        return CMD_RESULT_FAILED
-
-    ret, err = context.executor.mem_write(context.base_addr + address, data)
+    data, err = cmd.get_bytes_arg("data", 1, b"")
     if err is not None:
-        print("Error: can not write memory at 0x%x - 0x%x, %s" % (address, address + len(data), err))
-        return CMD_RESULT_FAILED
+        return CMD_RESULT_FAILED, err
+
+    ret, err = ctx.executor.mem_write(ctx.base_addr + address, data)
+    if err is not None:
+        err = "can not write memory at 0x%x - 0x%x, %s" % (address, address + len(data), err)
+        return CMD_RESULT_FAILED, err
     hexdump(data, off=address)
-    return CMD_RESULT_OK
+    return CMD_RESULT_OK, None
 
 
-def cmd_mem_map(context: Context, args: list[str]) -> int:
-    if context.state != State.LOADED:
-        print("invalid context state")
-        return CMD_RESULT_FAILED
+def cmd_mem_map(ctx: Context, cmd: Command) -> (int, str):
+    if ctx.state != State.LOADED:
+        return CMD_RESULT_FAILED, "invalid context state"
 
     # <address>
-    if len(args) < 1:
-        print("missing <addr> arg")
-        return CMD_RESULT_FAILED
-    address = parse_address(args[0], -1)
-    if address == -1:
-        print("invalid address format: %s" % args[0])
-        return CMD_RESULT_FAILED
+    address, err = cmd.get_addr_arg("addr", 0, -1)
+    if err is not None:
+        return CMD_RESULT_FAILED, err
 
     # <size>
-    if len(args) < 2:
-        print("missing <size> arg")
-        return CMD_RESULT_FAILED
-    size = parse_number(args[1], -1)
-    if size == -1:
-        print("invalid number format: %s" % args[1])
-        return CMD_RESULT_FAILED
+    size, err = cmd.get_int_arg("size", 1, -1)
+    if err is not None:
+        return CMD_RESULT_FAILED, err
 
     # <prot>
-    if len(args) < 3:
-        prot = MemoryPerm.PROT_ALL
-    else:
-        prot = parse_number(args[2], MemoryPerm.PROT_NONE)
-
-    addr, err = context.executor.mem_map(address, size, prot)
-    start_addr = context.arch.format_address(address)
-    end_addr = context.arch.format_address(address + size)
+    prot, err = cmd.get_int_arg("prot", 2, int(MemoryPerm.PROT_ALL))
     if err is not None:
-        print("Error: can not map memory at %s- %sx %s, %s" % (start_addr, end_addr, perm_to_str(prot), err))
-        return CMD_RESULT_FAILED
+        return CMD_RESULT_FAILED, err
+
+    addr, err = ctx.executor.mem_map(address, size, prot)
+    start_addr = ctx.arch.format_address(address)
+    end_addr = ctx.arch.format_address(address + size)
+    if err is not None:
+        err = "can not map memory at %s- %sx %s, %s" % (start_addr, end_addr, perm_to_str(prot), err)
+        return CMD_RESULT_FAILED, err
     print("%s - %s %s" % (start_addr, end_addr, perm_to_str(prot)))
-    return CMD_RESULT_OK
+    return CMD_RESULT_OK, None

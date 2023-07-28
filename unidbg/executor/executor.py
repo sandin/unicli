@@ -40,6 +40,7 @@ class Executor(object):
         :param size: size
         :return: (success, error)
         """
+        pass
 
     def mem_protect(self, address: int, size: int, perms: MemoryPerm) -> (bool, str):
         """

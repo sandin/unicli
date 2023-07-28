@@ -180,3 +180,49 @@ Fill memory with zeros for .bss section [0x10fa000 - 0x10fd000]
 >>> mem_read 0xFDC80 0x08
 0x000fdc80  00 00 00 00 00 00 00 00                           |........        |
 ```
+
+​      
+
+### script
+
+You can actually write all the commands to a script file and then use the script command to load the file and execute it.
+
+​     
+
+script_file:
+
+```
+help
+load /your/path/libdemo.so
+mem_list
+mem_read 0x38550 0x10
+mem_read 0xF9068 0x08
+mem_read 0xFDC80 0x08
+
+mem_map 0x00010000 8*1024*1024
+reg_write all 0
+reg_write sp 0x00010000+(8*1024*1024)
+reg_read all
+
+set ret "C0 03 5F D6" # patch ret
+set nop "1F 20 03 D5" # patch nop
+
+mem_write 0x38550 $ret
+mem_write 0x374F0 $ret
+mem_write 0x37E10 $ret
+mem_write 0x40528 $nop
+mem_write 0x40530 $nop
+
+unset ret
+unset nop
+
+hook_block 0x38550 mem_read 0xFBA68 0x10
+
+reg_write X20 0xFBD50
+emu_start 0x407E0 0x40844
+
+reg_read all
+mem_read 0xFBAB8 0xa
+
+exit
+```

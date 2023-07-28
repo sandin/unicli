@@ -5,47 +5,41 @@ from unidbg.context import Context, State
 from unidbg.arch.arch import Arch
 from unidbg.loader.elf_loader import ElfLoader
 from unidbg.util.file_format import get_file_format, FileFormat, get_cpu_arch
+from unidbg.util.cmd_parser import Command
 from unidbg.executor.unicorn_executor import UnicornExecutor
-from ..arch.arch_arm64 import ArchSpecArm64
+from unidbg.arch.arch_arm64 import ArchSpecArm64
 
 
-def cmd_load(context: Context, args: list[str]) -> int:
-    if len(args) < 1:
-        print("Error: missing <filename> arg")
-        return CMD_RESULT_FAILED
+def cmd_load(ctx: Context, cmd: Command) -> (int, str):
+    filename, err = cmd.get_file_arg("filename", 0, None)
+    if err is not None:
+        return CMD_RESULT_FAILED, err
 
-    filename = args[0]
-    if not os.path.exists(filename):
-        print("Error: `%s` file is not exists!" % filename)
-        return CMD_RESULT_FAILED
-
+    # Create Loader
     file_format = get_file_format(filename)
     if file_format == FileFormat.ELF:
-        context.loader = ElfLoader()
+        ctx.loader = ElfLoader()
     # TODO: if file_format == FileFormat.PE:
     #   context.loader = PELoader()
     # TODO: if file_format == FileFormat.MACH_O:
     #   context.loader = MachOLoader()
     else:
-        print("Error: unsupported file format %s" % filename)
-        return CMD_RESULT_FAILED
+        return CMD_RESULT_FAILED, "unsupported file format %s" % filename
 
     # Arch Spec helper
     arch = get_cpu_arch(filename)
     if arch == Arch.ARCH_ARM64:
-        context.arch = ArchSpecArm64()
+        ctx.arch = ArchSpecArm64()
     else:
-        print("Error: unsupported arch %d" % arch)
-        return CMD_RESULT_FAILED
+        return CMD_RESULT_FAILED, "unsupported arch %d" % arch
 
-    # Create Unicorn Executor
-    context.executor = UnicornExecutor(arch)
+    # Create Executor
+    ctx.executor = UnicornExecutor(arch)
 
     # Load ELF/PE/Mach-O file into virtual memory
-    loaded_info, err = context.loader.load(context.executor, filename)
+    loaded_info, err = ctx.loader.load(ctx.executor, filename)
     if err is not None:
-        print("Error: can not load %s, %s" % (filename, err))
-        return CMD_RESULT_FAILED
-    context.base_addr = loaded_info.load_bias
-    context.state = State.LOADED
-    return CMD_RESULT_OK
+        return CMD_RESULT_FAILED, "can not load %s, %s" % (filename, err)
+    ctx.base_addr = loaded_info.load_bias
+    ctx.state = State.LOADED
+    return CMD_RESULT_OK, None

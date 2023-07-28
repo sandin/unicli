@@ -21,3 +21,4 @@ class Context:
     padding_cmds: list[str] = field(default_factory=list)
     state: State = State.INVALID
     prompt: str = ">>>"
+    local_vars: dict[str, str] = field(default_factory=dict)

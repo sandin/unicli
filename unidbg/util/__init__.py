@@ -11,3 +11,5 @@ def parse_init_script(filename):
         for line in f:
             cmds.append(line.strip())
     return cmds
+
+
