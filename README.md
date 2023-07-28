@@ -157,6 +157,8 @@ Now you can read some interested memory after the simulation execution:
 0x00000fbab8  30 78 34 38 34 37 31 36  38 00                    |0x4847168.      |
 ```
 
+Bingo! The memory in this example originally held an encrypted string, but after simulation execution now you can see the decrypted string in plaintext.
+
 ​            
 
 ### Register Read
