@@ -3,7 +3,7 @@ from unidbg.context import Context
 from unidbg.util.cmd_parser import Command
 
 
-def cmd_set(context: Context, cmd: Command) -> (int, str):
+def cmd_set(ctx: Context, cmd: Command) -> (int, str):
     name, err = cmd.get_str_arg("name", 0, None)
     if err is not None:
         return CMD_RESULT_FAILED, err
@@ -12,20 +12,20 @@ def cmd_set(context: Context, cmd: Command) -> (int, str):
     if err is not None:
         return CMD_RESULT_FAILED, err
 
-    context.local_vars[name] = value
+    ctx.local_vars[name] = value
     print("set %s = %s" % (name, value))
     return CMD_RESULT_OK, None
 
 
-def cmd_unset(context: Context, cmd: Command) -> (int, str):
+def cmd_unset(ctx: Context, cmd: Command) -> (int, str):
     name, err = cmd.get_str_arg("name", 0, None)
     if err is not None:
         return CMD_RESULT_FAILED, err
 
-    if name not in context.local_vars:
+    if name not in ctx.local_vars:
         return CMD_RESULT_FAILED, "%s is undefined" % name
 
-    value = context.local_vars[name]
-    del context.local_vars[name]
+    value = ctx.local_vars[name]
+    del ctx.local_vars[name]
     print("unset %s(%s)" % (name, value))
     return CMD_RESULT_OK, None

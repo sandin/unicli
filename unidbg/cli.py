@@ -3,6 +3,7 @@ import sys
 from prompt_toolkit import prompt
 
 from .__init__ import __version__
+from .command.cmd_emu import cmd_emu_start, cmd_emu_stop
 from .command.cmd_var import cmd_set, cmd_unset
 from .context import Context
 from .command import CMD_RESULT_EXIT, CMD_RESULT_FAILED
@@ -28,6 +29,8 @@ register_cmd(g_all_commands, "reg_write",  "rw", handler=cmd_reg_write)
 register_cmd(g_all_commands, "reg_read",  "rr", handler=cmd_reg_read)
 register_cmd(g_all_commands, "set",  "st", handler=cmd_set)
 register_cmd(g_all_commands, "unset",  "us", handler=cmd_unset)
+register_cmd(g_all_commands, "emu_start",  "es", handler=cmd_emu_start)
+register_cmd(g_all_commands, "emu_stop",  "et", handler=cmd_emu_stop)
 
 
 def main():
@@ -46,11 +49,11 @@ def main():
         if len(ctx.padding_cmds) > 0:
             line = ctx.padding_cmds[0]
             del ctx.padding_cmds[0]
-            if line.strip():
+            if line.strip() and not line.startswith("#"):
                 print("%s %s" % (ctx.prompt, line))
         else:
             line = prompt("%s " % ctx.prompt)
-        if not line.strip():
+        if not line.strip() or line.startswith("#"):
             continue
         command = parse_command(ctx, line)
         if command.cmd in g_all_commands:

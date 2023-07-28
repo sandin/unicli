@@ -59,7 +59,7 @@ class UnicornExecutor(Executor):
     def _unmap_perms(perms: int) -> MemoryPerm:
         return MemoryPerm(perms)
 
-    def _find_available_mem_range(self, size) -> int:
+    def _find_available_mem_range(self, size: int) -> int:
         last_addr = self.MIN_ADDR
         for start, end, perms in self._mu.mem_regions():
             if start - last_addr > size:
@@ -67,16 +67,30 @@ class UnicornExecutor(Executor):
             last_addr = end
         return last_addr
 
-    def reg_write(self, reg_num, value) -> (bool, str):
+    def reg_write(self, reg_num: int, value: int) -> (bool, str):
         try:
             self._mu.reg_write(reg_num, value)
             return True, None
         except UcError as e:
             return False, e
 
-    def reg_read(self, reg_num) -> (int, str):
+    def reg_read(self, reg_num: int) -> (int, str):
         try:
             value = self._mu.reg_read(reg_num)
             return value, None
+        except UcError as e:
+            return False, e
+
+    def emu_start(self, start_addr: int, end_addr: int, timeout: int, count: int) -> (bool, str):
+        try:
+            self._mu.emu_start(start_addr, end_addr, timeout, count)
+            return True, None
+        except UcError as e:
+            return False, e
+
+    def emu_stop(self) -> (bool, str):
+        try:
+            self._mu.emu_stop()
+            return True, None
         except UcError as e:
             return False, e

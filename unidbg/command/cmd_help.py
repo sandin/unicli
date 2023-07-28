@@ -3,22 +3,33 @@ from unidbg.context import Context
 from unidbg.util.cmd_parser import Command
 
 USAGE = """Usage: <command> <args..>
-command:
-   load <filename>                          load an ELF/PE/Mach-O file
-   mem_map <abs_addr> <size> [<port>]       map a piece of virtual memory
-   mem_write <rel_addr> <data>              write data to memory at address
-   mem_read <rel_addr> <size>               read the memory at address
-   mem_list                                 list all mapped memory range
-   reg_write <reg_name> <value>             write a register
-   reg_read <reg_name>                      read a register
-   hook_block <rel_addr> <subcommand>       hook block at address
-   hook_code <rel_addr> <subcommand>        hook code at address
-   emu_start <start_addr> <end_addr>        start new execution
-   set_base_addr <abs_addr>                 set base address for all relative addresses
-   set <name> <value>                       set local variable
-   script <filename>                        load script file
-   help                                     print help information
-   exit                                     exit program   
+ common:
+     l load <filename>                          Load an ELF/PE/Mach-O file
+     s script <filename>                        Load a script file
+    st set <name> <value>                       Set a local variable
+    us unset <name>                             Unset a local variable
+    sb set_base <abs_addr>                      Set base address for all relative addresses
+     h help                                     Print help information
+     e exit                                     Exit the program   
+   
+ memory:
+    mm mem_map <abs_addr> <size> [<port>]       Map a piece of virtual memory
+    mw mem_write <rel_addr> <data>              Write data to memory at address
+    mr mem_read <rel_addr> <size>               Read the memory at address
+    ml mem_list                                 List all mapped memory range
+    
+ register:
+    rw reg_write <reg_name> <value>             Write a register
+    rr reg_read <reg_name>                      Read a register
+    
+ hook:
+    hb hook_block <rel_addr> <subcommand>       Hook block at address
+    hc hook_code <rel_addr> <subcommand>        Hook code at address
+    
+ emu:
+    es emu_start <start_addr> <end_addr>        Start emulation
+                 [<timeout> <count>]
+    et emu_stop                                 Stop emulation        
 """
 
 

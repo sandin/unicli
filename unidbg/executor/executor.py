@@ -59,7 +59,7 @@ class Executor(object):
         """
         pass
 
-    def reg_write(self, reg_num, value) -> (bool, str):
+    def reg_write(self, reg_num: int, value: int) -> (bool, str):
         """
         Write a value to the specified register
         :param reg_num: target reg
@@ -68,10 +68,28 @@ class Executor(object):
         """
         pass
 
-    def reg_read(self, reg_num) -> (int, str):
+    def reg_read(self, reg_num: int) -> (int, str):
         """
         Read the value of the specified register
         :param reg_num: target reg
         :return: (value, error)
+        """
+        pass
+
+    def emu_start(self, start_addr: int, end_addr: int, timeout: int, count: int) -> (bool, str):
+        """
+        Start emulation at the specified addr
+        :param start_addr: address to start
+        :param end_addr: address to end
+        :param timeout: timeout
+        :param count: count
+        :return: (success, error)
+        """
+        pass
+
+    def emu_stop(self) -> (bool, str):
+        """
+        Stop the emulation
+        :return: (success, error)
         """
         pass

@@ -25,9 +25,9 @@ def cmd_mem_list(ctx: Context, cmd: Command) -> (int, str):
         return CMD_RESULT_FAILED, "can not read memory list, %s" % err
 
     for start, end, prot in regions:
-        start_addr = ctx.arch.format_address(start)
-        end_addr = ctx.arch.format_address(end + 1)
-        print("%s - %s %s" % (start_addr, end_addr, perm_to_str(prot)))
+        start_addr_s = ctx.arch.format_address(start)
+        end_addr_s = ctx.arch.format_address(end + 1)
+        print("%s - %s %s" % (start_addr_s, end_addr_s, perm_to_str(prot)))
     return CMD_RESULT_OK, None
 
 
@@ -95,10 +95,10 @@ def cmd_mem_map(ctx: Context, cmd: Command) -> (int, str):
         return CMD_RESULT_FAILED, err
 
     addr, err = ctx.executor.mem_map(address, size, prot)
-    start_addr = ctx.arch.format_address(address)
-    end_addr = ctx.arch.format_address(address + size)
+    start_addr_s = ctx.arch.format_address(address)
+    end_addr_s = ctx.arch.format_address(address + size)
     if err is not None:
-        err = "can not map memory at %s- %sx %s, %s" % (start_addr, end_addr, perm_to_str(prot), err)
+        err = "can not map memory at %s- %sx %s, %s" % (start_addr_s, end_addr_s, perm_to_str(prot), err)
         return CMD_RESULT_FAILED, err
-    print("%s - %s %s" % (start_addr, end_addr, perm_to_str(prot)))
+    print("%s - %s %s" % (start_addr_s, end_addr_s, perm_to_str(prot)))
     return CMD_RESULT_OK, None
