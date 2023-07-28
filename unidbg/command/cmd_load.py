@@ -34,7 +34,7 @@ def cmd_load(ctx: Context, cmd: Command) -> (int, str):
         return CMD_RESULT_FAILED, "unsupported arch %d" % arch
 
     # Create Executor
-    ctx.executor = UnicornExecutor(arch)
+    ctx.executor = UnicornExecutor(ctx, arch)
 
     # Load ELF/PE/Mach-O file into virtual memory
     loaded_info, err = ctx.loader.load(ctx.executor, filename)

@@ -25,6 +25,18 @@ def tokenize(line: str, split_tokens: list[str], wrap_tokens: list[str], end_tok
     return parts
 
 
+def join_args(args: list[str]):
+    s = ""
+    for i, arg in enumerate(args):
+        if " " in arg:
+            s += '"' + arg + '"'
+        else:
+            s += arg
+        if i != len(args) -1:
+            s += " "
+    return s
+
+
 def is_expression(text: str) -> bool:
     expression_token = ["+", "-", "*", "/"]
     for c in text:
@@ -85,12 +97,16 @@ def parse_bytes(text: str) -> bytes:
 
 ERR_USE_DEF = "ERR_UES_DEF"
 
+
 class Command(object):
 
     def __init__(self, ctx: Context, cmd: Optional[str], args: list[str]):
         self.ctx = ctx
         self.cmd = cmd
         self.args = args
+
+    def get_args(self):
+        return self.args
 
     def _get_arg(self, name: str, index: int, def_val: Optional[any]) -> (any, str):
         if index >= len(self.args):
@@ -144,11 +160,19 @@ class Command(object):
             return def_val, "invalid data format: %s" % arg
         return data, None
 
+    def get_subcommand_arg(self, name: str, index: int, def_val: Optional[any]) -> (any, str):
+        if index >= len(self.args):
+            return def_val, "missing <%s> arg" % name
+        cmd = self.args[index]
+        args = self.args[index+1:]
+        return Command(self.ctx, cmd, args)
 
-def parse_command(ctx: Context, line: str) -> Command:
-    c = Command(ctx, None, [])
+
+def parse_command(ctx: Context, line: str) -> Optional[Command]:
     parts = tokenize(line, [' '], ['"', "'"], ['#'])
     if len(parts) > 0:
+        c = Command(ctx, None, [])
         c.cmd = parts[0]
         c.args += parts[1:]
-    return c
+        return c
+    return None

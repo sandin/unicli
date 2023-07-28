@@ -14,6 +14,8 @@ class State(IntEnum):
 
 @dataclass
 class Context:
+    commands: dict[str, any] = field(default_factory=dict)
+    usage: str = None
     executor: Optional[Executor] = None
     loader: Optional[Loader] = None
     arch: Optional[ArchSpec] = None
@@ -22,3 +24,12 @@ class Context:
     state: State = State.INVALID
     prompt: str = ">>>"
     local_vars: dict[str, str] = field(default_factory=dict)
+
+
+def execute_command(ctx: Context, command) -> (int, str):
+    if command.cmd in ctx.commands:
+        cmd_handle_func = ctx.commands[command.cmd]
+        return cmd_handle_func(ctx, command)
+    else:
+        return False, "unsupported command: `%s`" % command.cmd
+

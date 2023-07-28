@@ -93,3 +93,37 @@ class Executor(object):
         :return: (success, error)
         """
         pass
+
+    def add_block_hook(self, address: int, subcommand: any) -> (bool, str):
+        """
+        Add block hook
+        :param address: target address
+        :param subcommand: subcommand that need to be executed when the hook is hit
+        :return: (success, error)
+        """
+        pass
+
+    def del_block_hook(self, address: int) -> (bool, str):
+        """
+        Delete block hook
+        :param address: target address
+        :return: (success, error)
+        """
+        pass
+
+    def add_code_hook(self, address: int, subcommand: any) -> (bool, str):
+        """
+        Add code hook
+        :param address: target address
+        :param subcommand: subcommand that need to be executed when the hook is hit
+        :return: (success, error)
+        """
+        pass
+
+    def del_code_hook(self, address: int) -> (bool, str):
+        """
+        Delete code hook
+        :param address: target address
+        :return: (success, error)
+        """
+        pass

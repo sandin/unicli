@@ -217,7 +217,8 @@ unset ret
 unset nop
 
 # hook address
-hook_block 0x38550 mem_read 0xFBA68 0x10
+hook_block 0x40800 reg_read X8
+hook_code 0x4083c mem_read 0xFBAB8 0xa
 
 # start emulation
 reg_write X20 0xFBD50

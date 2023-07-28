@@ -1,19 +1,64 @@
 from .executor import Executor, MemoryPerm
 from unicorn import *
-from unicorn.arm64_const import *
-
+from capstone import *
 from unidbg.arch.arch import Arch
+from unidbg.context import Context, execute_command
+from unidbg.util.cmd_parser import Command
 
 
 class UnicornExecutor(Executor):
     MIN_ADDR = 0x01000000
 
-    def __init__(self, arch: Arch):
+    def __init__(self, ctx: Context, arch: Arch):
         Executor.__init__(self)
+        self.context = ctx  # type: Context
         if arch == Arch.ARCH_ARM64:
             self._mu = Uc(UC_ARCH_ARM64, UC_MODE_ARM)  # type: unicorn.Uc
+            self.cs = Cs(CS_ARCH_ARM64, CS_MODE_ARM)  # type: Cs
         else:
             raise Exception("Unsupported arch")
+        self.block_hooks = {}
+        self.code_hooks = {}
+        self._setup_hooks()
+
+    def _setup_hooks(self):
+        self._mu.hook_add(UC_HOOK_BLOCK, self.hook_block, self)
+        self._mu.hook_add(UC_HOOK_CODE, self.hook_code, self)
+
+    @staticmethod
+    def hook_block(mu: unicorn.Uc, address: int, size: int, user_data: any):
+        executor = user_data # type: UnicornExecutor
+        ctx = executor.context  # type: Context
+        rel_address = address - ctx.base_addr
+        address_s = ctx.arch.format_address(rel_address)
+        block_name = "blk_%x" % rel_address
+        print("%s %s:" % (address_s, block_name))
+
+        # user's hooks
+        if rel_address in executor.block_hooks:
+            subcommand = executor.block_hooks[rel_address]
+            execute_command(ctx, subcommand)
+
+    @staticmethod
+    def hook_code(mu: unicorn.Uc, address: int, size: int, user_data: any):
+        executor = user_data # type: UnicornExecutor
+        ctx = executor.context  # type: Context
+        cs = executor.cs  # type: Cs
+        rel_address = address - ctx.base_addr
+
+        code, err = executor.mem_read(address, size)
+        if err is not None:
+            print("Error: can not read memory at 0x%x" % address)
+            return
+
+        for i in cs.disasm(code, rel_address, 0):
+            address_s = ctx.arch.format_address(i.address)
+            print("{}              {:<10s} {:<s}".format(address_s, i.mnemonic, i.op_str))
+
+        # user's hooks
+        if rel_address in executor.code_hooks:
+            subcommand = executor.code_hooks[rel_address]
+            execute_command(ctx, subcommand)
 
     def mem_map(self, address: int, size: int, perms: MemoryPerm) -> (int, str):
         try:
@@ -94,3 +139,23 @@ class UnicornExecutor(Executor):
             return True, None
         except UcError as e:
             return False, e
+
+    def add_block_hook(self, address: int, subcommand: Command) -> (bool, str):
+        self.block_hooks[address] = subcommand
+        return True, None
+
+    def del_block_hook(self, address: int) -> (bool, str):
+        if address not in self.block_hooks:
+            return False, "the address has not been hooked"
+        del self.block_hooks[address]
+        return True, None
+
+    def add_code_hook(self, address: int, subcommand: Command) -> (bool, str):
+        self.code_hooks[address] = subcommand
+        return True, None
+
+    def del_code_hook(self, address: int) -> (bool, str):
+        if address not in self.code_hooks:
+            return False, "the address has not been hooked"
+        del self.code_hooks[address]
+        return True, None

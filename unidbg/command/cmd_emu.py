@@ -23,13 +23,14 @@ def cmd_emu_start(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         return CMD_RESULT_FAILED, err
 
-    ret, err = ctx.executor.emu_start(ctx.base_addr + start_addr, ctx.base_addr + end_addr, timeout, count)
     start_addr_s = ctx.arch.format_address(start_addr)
     end_addr_s = ctx.arch.format_address(end_addr)
+    print("Start emulation, range: %s - %s" % (start_addr_s, end_addr_s))
+    ret, err = ctx.executor.emu_start(ctx.base_addr + start_addr, ctx.base_addr + end_addr, timeout, count)
     if err is not None:
         err = "can not start emulation at %s - %s, %s" % (start_addr_s, end_addr_s, err)
         return CMD_RESULT_FAILED, err
-    print("Emulation done, %s - %s" % (start_addr_s, end_addr_s))
+    print("Emulation done, range: %s - %s" % (start_addr_s, end_addr_s))
     return CMD_RESULT_OK, None
 
 
