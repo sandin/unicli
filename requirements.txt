@@ -3,3 +3,4 @@ lief==0.13.2
 prompt-toolkit==3.0.39
 unicorn==2.0.1.post1
 pytest==7.4.0
+-e .

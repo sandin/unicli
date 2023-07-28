@@ -16,7 +16,6 @@ from .util.cmd_parser import parse_command
 
 USAGE = """Usage: <command> <args..>
  common:
-     l load <filename>                          Load an ELF/PE/Mach-O file
      s script <filename>                        Load a script file
     st set <name> <value>                       Set a local variable
     us unset <name>                             Unset a local variable

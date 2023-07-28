@@ -16,6 +16,11 @@ setup(
   license='MIT',
   include_package_data=True, 
   packages=find_namespace_packages(include=['unidb.*', "unidb"]),
+  entry_points={
+    'console_scripts': [
+      'unidbg = unidb.cli:main'
+    ]
+  },
   install_requires='''
 capstone==5.0.0.post1
 lief==0.13.2
