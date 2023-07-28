@@ -3,15 +3,13 @@ import sys
 from prompt_toolkit import prompt
 
 from .__init__ import __version__
+from .command import CMD_RESULT_EXIT, CMD_RESULT_FAILED
 from .command.cmd_hook import cmd_hook_block, cmd_hook_code
 from .command.cmd_emu import cmd_emu_start, cmd_emu_stop
-from .command.cmd_var import cmd_set, cmd_unset
-from .command import CMD_RESULT_EXIT, CMD_RESULT_FAILED
-from .command.cmd_common import cmd_exit, cmd_help
-from .command.cmd_load import cmd_load
+from .command.cmd_common import cmd_exit, cmd_help, cmd_script, cmd_set, cmd_unset, cmd_set_base
+from .command.cmd_load import cmd_load, cmd_unload, cmd_load_list
 from .command.cmd_mem import cmd_mem_list, cmd_mem_read, cmd_mem_map, cmd_mem_write
 from .command.cmd_reg import cmd_reg_write, cmd_reg_read
-from .command.cmd_script import cmd_script
 from .context import Context, execute_command
 from .util import register_cmd, parse_init_script
 from .util.cmd_parser import parse_command
@@ -25,7 +23,12 @@ USAGE = """Usage: <command> <args..>
     sb set_base <abs_addr>                      Set base address for all relative addresses
      h help                                     Print help information
      e exit                                     Exit the program   
-
+     
+ load:
+    lf load <filename>                          Load an ELF/PE/Mach-O file as a module
+    lu unload <filename>                        Unload a module
+    ll load_list                                List all loaded modules
+     
  memory:
     mm mem_map <abs_addr> <size> [<port>]       Map a piece of virtual memory
     mw mem_write <rel_addr> <data>              Write data to memory at address
@@ -49,16 +52,19 @@ USAGE = """Usage: <command> <args..>
 CMDS = {}
 register_cmd(CMDS, "exit", ".exit", "exit()", "e", handler=cmd_exit)
 register_cmd(CMDS, "help", "h", handler=cmd_help)
-register_cmd(CMDS, "load", "l", handler=cmd_load)
 register_cmd(CMDS, "script", "s", handler=cmd_script)
+register_cmd(CMDS, "set", "st", handler=cmd_set)
+register_cmd(CMDS, "unset", "us", handler=cmd_unset)
+register_cmd(CMDS, "set_base", "sb", handler=cmd_set_base)
+register_cmd(CMDS, "load", "l", handler=cmd_load)
+register_cmd(CMDS, "unload", "lu", handler=cmd_unload)
+register_cmd(CMDS, "load_list", "ll", handler=cmd_load_list)
 register_cmd(CMDS, "mem_list", "ml", handler=cmd_mem_list)
 register_cmd(CMDS, "mem_read", "mr", handler=cmd_mem_read)
 register_cmd(CMDS, "mem_write", "mr", handler=cmd_mem_write)
 register_cmd(CMDS, "mem_map", "mm", handler=cmd_mem_map)
 register_cmd(CMDS, "reg_write", "rw", handler=cmd_reg_write)
 register_cmd(CMDS, "reg_read", "rr", handler=cmd_reg_read)
-register_cmd(CMDS, "set", "st", handler=cmd_set)
-register_cmd(CMDS, "unset", "us", handler=cmd_unset)
 register_cmd(CMDS, "emu_start", "es", handler=cmd_emu_start)
 register_cmd(CMDS, "emu_stop", "et", handler=cmd_emu_stop)
 register_cmd(CMDS, "hook_block", "hb", handler=cmd_hook_block)

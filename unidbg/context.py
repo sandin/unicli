@@ -1,10 +1,9 @@
 from enum import IntEnum
 from typing import Optional
 from dataclasses import dataclass, field
-
 from unidbg.arch.arch import ArchSpec
 from unidbg.executor.executor import Executor
-from unidbg.loader.loader import Loader
+from unidbg.loader.loader import Loader, LoadedInfo
 
 
 class State(IntEnum):
@@ -18,6 +17,7 @@ class Context:
     usage: str = None
     executor: Optional[Executor] = None
     loader: Optional[Loader] = None
+    loaded: list[LoadedInfo] = field(default_factory=list)
     arch: Optional[ArchSpec] = None
     base_addr: int = 0
     padding_cmds: list[str] = field(default_factory=list)

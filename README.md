@@ -194,6 +194,7 @@ script_file:
 ```
 help
 load /your/path/libdemo.so
+load_list
 mem_list
 mem_read 0x38550 0x10
 mem_read 0xF9068 0x08
@@ -228,5 +229,6 @@ emu_start 0x407E0 0x40844
 reg_read all
 mem_read 0xFBAB8 0xa
 
+unload all
 exit
 ```

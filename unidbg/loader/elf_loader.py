@@ -13,7 +13,7 @@ class ElfLoader(Loader):
     """
 
     def load(self, executor: Executor, filename: str) -> (LoadedInfo, str):
-        loaded_info = LoadedInfo()
+        loaded_info = LoadedInfo(filename=filename)
         elf = lief.ELF.parse(filename)
         if elf.format != lief.EXE_FORMATS.ELF:
             return None, "Bad ELF format"

@@ -1,11 +1,13 @@
+from dataclasses import dataclass
 from unidbg.executor.executor import Executor
 
 
-class LoadedInfo(object):
-    def __init__(self):
-        self.load_start = 0
-        self.load_bias = 0
-        self.load_size = 0
+@dataclass
+class LoadedInfo:
+    filename: str = None
+    load_start: int = 0
+    load_bias: int = 0
+    load_size: int = 0
 
 
 class Loader(object):
