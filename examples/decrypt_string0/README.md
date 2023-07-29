@@ -327,11 +327,11 @@ As we can see from the assembly code, the logic for decrypting the string is to 
 
 ```
 ciphertext = AC D4 BD D4 44 B2 75 FE  B0 52 65 1D C7 65 87 61
-						 43 14 2C 21 8C 38 8D 2F  07 1A 7E 58 A4 50 E2 17
-						 40 53 71 09 C5 55 88 87
-secretkey	 = EF B5 C9 B1 23 DD 07 87  EF B5 C9 B1 23 DD 07 87
+             43 14 2C 21 8C 38 8D 2F  07 1A 7E 58 A4 50 E2 17
+             40 53 71 09 C5 55 88 87
+secretkey  = EF B5 C9 B1 23 DD 07 87  EF B5 C9 B1 23 DD 07 87
              EF B5 C9 B1 23 DD 07 87  EF B5 C9 B1 23 DD 07 87
-						 EF B5 C9 B1 23 DD 07 87
+             EF B5 C9 B1 23 DD 07 87
 plaintext  = ciphertext ^ secretkey
 ```
 
