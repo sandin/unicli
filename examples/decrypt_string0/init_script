@@ -1,0 +1,35 @@
+# load memory
+load examples/decrypt_string0/text_385AC.bin --format raw --arch arm64 --base 0x02000000 --offset 0x385AC
+load examples/decrypt_string0/text_43000.bin --format raw --arch arm64 --base 0x02000000 --offset 0x43000
+load examples/decrypt_string0/rodata_BCE50.bin --format raw --arch arm64 --base 0x02000000 --offset 0xBCE50
+#disasm 0x385AC 0x3888C-0x385AC
+
+mem_map 0x02000000+0x36E00 0x385A0-0x36E00  # .plt segment
+mem_map 0x02000000+0xF9110 0xFDC90-0xF9110  # .bss segment
+mem_list
+
+# initialize stack & registers
+mem_map 0x00010000 8*1024*1024
+set sp 0x00010000+(8*1024*1024)
+
+# patch code
+set ret "C0 03 5F D6"
+set nop "1F 20 03 D5"
+mem_write 0x38550 $ret  # .__cxa_guard_acquire
+mem_write 0x374F0 $ret  # .__cxa_guard_release
+mem_write 0x37E10 $ret  # .__cxa_atexit
+
+# patch
+#mem_write 0xfbdc0 "01"  # 00000000000385C4 TBZ W8, #0, loc_38814
+mem_write 0x386C8 $nop  # BL sub_45984 ; memset
+mem_write 0x386D0 $nop  # BL sub_45984 ; memset
+
+# hook
+hook_code 0x3887c mem_read 0xFB298 0x29
+
+# start emulation
+reg_write all 0 sp $sp
+emu_start 0x385AC 0x038814-4
+mem_read 0xFB298 0x28
+mem_read 0xFB780 0x40
+mem_read 0xF9110 0xFDC90-0xF9110 --out bss.bin

@@ -131,6 +131,6 @@ dmypy.json
 .idea/
 
 .DS_Store
-init_script
+/init_script
 
 /*.bin
