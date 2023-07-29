@@ -16,11 +16,12 @@ def tokenize(line: str, split_tokens: list[str], wrap_tokens: list[str], end_tok
             in_wrap = not in_wrap
             continue
         if not in_wrap and c in split_tokens:
-            parts.append(last_part)
+            if len(last_part.strip()) > 0:
+                parts.append(last_part)
             last_part = ""
             continue
         last_part += c
-    if len(last_part) > 0:
+    if len(last_part.strip()) > 0:
         parts.append(last_part)
     return parts
 
@@ -64,7 +65,10 @@ def parse_number(text: str, def_val: int, base=10) -> (int, str):
             except:
                 pass
         elif is_hexadecimal(text):
-            arg = int(text, base=16)
+            try:
+                arg = int(text, base=16)
+            except:
+                pass
         else:
             try:
                 arg = int(text, base=base)
@@ -108,6 +112,9 @@ class Command(object):
     def get_args(self):
         return self.args
 
+    def args_num(self):
+        return len(self.args)
+
     def _get_arg(self, name: str, index: int, def_val: Optional[any]) -> (any, str):
         if index >= len(self.args):
             if def_val is not None:  # it's an optional arg, just use the default value
@@ -139,7 +146,7 @@ class Command(object):
             return def_val, err if err != ERR_USE_DEF else None
         addr = parse_address(arg, def_val)
         if addr == def_val:
-            return def_val, "invalid address format: %s" % arg
+            return def_val, "invalid address format: `%s` = `%s`" % (name, arg)
         return addr, None
 
     def get_int_arg(self, name: str, index: int, def_val: Optional[int]) -> (int, str):
@@ -148,7 +155,7 @@ class Command(object):
             return def_val, err if err != ERR_USE_DEF else None
         addr = parse_number(arg, def_val)
         if addr == def_val:
-            return def_val, "invalid number format: %s" % arg
+            return def_val, "invalid number format: `%s` = `%s`" % (name, arg)
         return addr, None
 
     def get_bytes_arg(self, name: str, index: int, def_val: Optional[bytes]) -> (int, str):
@@ -157,7 +164,7 @@ class Command(object):
             return def_val, err if err != ERR_USE_DEF else None
         data = parse_bytes(arg)
         if len(data) == 0:
-            return def_val, "invalid data format: %s" % arg
+            return def_val, "invalid data format: `%s` = `%s`" % (name, arg)
         return data, None
 
     def get_subcommand_arg(self, name: str, index: int, def_val: Optional[any]) -> (any, str):

@@ -2,6 +2,10 @@
 
 An interactive command line interface for unicorn.
 
+The aim of this project is to provide a handy command line tool for analyzing binary assemblies, not to implement a complete simulation environment, which many projects have proved to be impossible.
+
+This tool will allow you to focus on the subject of your analysis instead of some repetitive and boring coding.
+
 ​      
 
 Dependencies:

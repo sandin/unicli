@@ -1,51 +1,59 @@
 import pytest
 
+from unicli.context import Context
 from unicli.util.cmd_parser import parse_command, parse_address, parse_bytes
 
 
 def test_parse_args():
-    command = parse_command("help")
+    ctx = Context()
+
+    command = parse_command(ctx, 'help')
     assert command.cmd == "help"
     assert len(command.args) == 0
 
-    command = parse_command('load /your/path/libdemo.so')
+    command = parse_command(ctx, 'load /your/path/libdemo.so')
     assert command.cmd == "load"
     assert len(command.args) == 1
     command.args[0] = "/your/path/libdemo.so"
 
-    command = parse_command('mem_read 0x38550 0x10')
+    command = parse_command(ctx, 'mem_read 0x38550 0x10')
     assert command.cmd == "mem_read"
     assert len(command.args) == 2
     command.args[0] = "0x38550"
     command.args[1] = "0x10"
 
-    command = parse_command('reg_write sp 0x00010000+(8*1024)')
+    command = parse_command(ctx, 'reg_write sp 0x00010000+(8*1024)')
     assert command.cmd == "reg_write"
     assert len(command.args) == 2
     command.args[0] = "sp"
     command.args[1] = "0x00010000+(8*1024)"
 
-    command = parse_command('# comment')
-    assert command.cmd is None
-    assert len(command.args) == 0
+    command = parse_command(ctx, '# comment')
+    assert command is None
 
-    command = parse_command('mem_list # comment')
+    command = parse_command(ctx, 'mem_list # comment')
     assert command.cmd == "mem_list"
     assert len(command.args) == 0
 
-    command = parse_command('mem_write 0x38550 "C0 03 5F D6" # patch ret')
+    command = parse_command(ctx, 'mem_write 0x38550 "C0 03 5F D6" # patch ret')
     assert command.cmd == "mem_write"
     assert len(command.args) == 2
     command.args[0] = "0x38550"
     command.args[1] = "C0 03 5F D6"
 
-    command = parse_command('hook_block 0x38550 mem_read 0xFBA68 0x10')
+    command = parse_command(ctx, 'hook_block 0x38550 mem_read 0xFBA68 0x10')
     assert command.cmd == "hook_block"
     assert len(command.args) == 4
     command.args[0] = "0x38550"
     command.args[1] = "mem_read"
     command.args[1] = "0xFBA68"
     command.args[1] = "0x10"
+
+    command = parse_command(ctx, 'emu_start 0x4061C 0x4061C  # adrl X20, #0xFBD50 ')
+    assert command.cmd == "emu_start"
+    assert len(command.args) == 2
+    command.args[0] = "0x4061C"
+    command.args[1] = "0x4061C"
 
 
 def test_parse_address():
