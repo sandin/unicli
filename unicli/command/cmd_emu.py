@@ -1,6 +1,6 @@
 from .__init__ import CMD_RESULT_FAILED, CMD_RESULT_OK
-from unidbg.context import Context, State
-from unidbg.util.cmd_parser import Command
+from unicli.context import Context, State
+from unicli.util.cmd_parser import Command
 
 
 def cmd_emu_start(ctx: Context, cmd: Command) -> (int, str):

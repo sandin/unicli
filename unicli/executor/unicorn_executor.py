@@ -1,9 +1,9 @@
 from .executor import Executor, MemoryPerm
 from unicorn import *
 from capstone import *
-from unidbg.arch.arch import Arch
-from unidbg.context import Context, execute_command
-from unidbg.util.cmd_parser import Command
+from unicli.arch.arch import Arch
+from unicli.context import Context, execute_command
+from unicli.util.cmd_parser import Command
 
 
 class UnicornExecutor(Executor):

@@ -1,6 +1,6 @@
 import pytest
 
-from unidbg.util.cmd_parser import parse_command, parse_address, parse_bytes
+from unicli.util.cmd_parser import parse_command, parse_address, parse_bytes
 
 
 def test_parse_args():

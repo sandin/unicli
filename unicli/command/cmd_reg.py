@@ -1,7 +1,7 @@
 import sys
-from unidbg.command import CMD_RESULT_FAILED, CMD_RESULT_OK
-from unidbg.context import Context, State
-from unidbg.util.cmd_parser import Command
+from unicli.command import CMD_RESULT_FAILED, CMD_RESULT_OK
+from unicli.context import Context, State
+from unicli.util.cmd_parser import Command
 
 
 ALL_REG_NUM = sys.maxsize

@@ -1,6 +1,6 @@
-# UniDbg
+# UniCli
 
-An interactive command line debugger for unicorn.
+An interactive command line interface for unicorn.
 
 ​      
 
@@ -9,7 +9,6 @@ Dependencies:
 * [unicorn](https://github.com/unicorn-engine/unicorn)
 * [capstone](https://github.com/capstone-engine/capstone)
 * [LIEF](https://github.com/lief-project/LIEF)
-* [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit)
 
 ​              
 
@@ -17,17 +16,17 @@ Dependencies:
 
 Install with pip:
 ```
-$ pip install unidbg
+$ pip install unicli
 ```
 
 Install with source code:
 ```
-$ git clone git@github.com:sandin/unidbg.git
-$ cd unidbg
+$ git clone git@github.com:sandin/unicli.git
+$ cd unicli
 $ pip install -r requirements.txt
 ```
 
-> NOTE: Using unidbg in python venv is highly recommended!
+> NOTE: Using unicli in python venv is highly recommended!
 
 ​                          
 
@@ -36,8 +35,8 @@ $ pip install -r requirements.txt
 Start the debugger:
 
 ```bash
-$ unidbg
-UniDbg 0.0.1
+$ unicli
+UniCli 0.0.1
 Type "help" for more information.
 ```
 
@@ -56,7 +55,7 @@ Fill memory with zeros to align with page size [0x10f9110 - 0x10fa000]
 Fill memory with zeros for .bss section [0x10fa000 - 0x10fd000]
 Successfully loaded module: /your/path/libdemo.so
 ```
-> NOTE: unidbg will map all LOAD segments in the ELF file to unicorn's virtual memory.
+> NOTE: unicli will map all LOAD segments in the ELF file to unicorn's virtual memory.
 
 ​              
 
@@ -115,7 +114,7 @@ hook code at 0x000004083c
 
 ### Start Emulation
 
-Then jump to the specified address to start the simulation execution, unidbg will print all executed assembly code and block information.
+Then jump to the specified address to start the simulation execution, unicli will print all executed assembly code and block information.
 
 ```
 >>> emu_start 0x407E0 0x40844
@@ -241,6 +240,6 @@ unload all
 exit
 ```
 
-> NOTE: In fact, you can write a lot of commands to a script file, then load that file with the `script` command, and unidbg will batch execute all the commands in that file together. 
+> NOTE: In fact, you can write a lot of commands to a script file, then load that file with the `script` command, and unicli will batch execute all the commands in that file together. 
 
 For more information you can just type `help`.

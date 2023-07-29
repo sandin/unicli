@@ -1,9 +1,9 @@
 from enum import IntEnum
 from typing import Optional
 from dataclasses import dataclass, field
-from unidbg.arch.arch import ArchSpec
-from unidbg.executor.executor import Executor
-from unidbg.loader.loader import Loader, LoadedInfo
+from unicli.arch.arch import ArchSpec
+from unicli.executor.executor import Executor
+from unicli.loader.loader import Loader, LoadedInfo
 
 
 class State(IntEnum):

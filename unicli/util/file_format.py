@@ -1,7 +1,7 @@
 from enum import IntEnum
 import lief
 
-from unidbg.arch.arch import Arch
+from unicli.arch.arch import Arch
 
 
 class FileFormat(IntEnum):

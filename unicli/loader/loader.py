@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from unidbg.executor.executor import Executor
+from unicli.executor.executor import Executor
 
 
 @dataclass

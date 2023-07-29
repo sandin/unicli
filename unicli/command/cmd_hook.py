@@ -1,6 +1,6 @@
 from .__init__ import CMD_RESULT_FAILED, CMD_RESULT_OK
-from unidbg.context import Context
-from unidbg.util.cmd_parser import Command
+from unicli.context import Context
+from unicli.util.cmd_parser import Command
 
 
 def cmd_hook_block(ctx: Context, cmd: Command) -> (int, str):

@@ -3,8 +3,8 @@ import sys
 import lief
 
 from .loader import Loader, LoadedInfo
-from unidbg.executor.executor import Executor, MemoryPerm
-from unidbg.util.memory import page_start, page_end, page_offset, PAGE_SIZE
+from unicli.executor.executor import Executor, MemoryPerm
+from unicli.util.memory import page_start, page_end, page_offset, PAGE_SIZE
 
 
 class ElfLoader(Loader):

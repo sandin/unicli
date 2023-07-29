@@ -1,7 +1,7 @@
 from .__init__ import CMD_RESULT_EXIT, CMD_RESULT_OK, CMD_RESULT_FAILED
-from unidbg.context import Context
-from unidbg.util.cmd_parser import Command
-from unidbg.util import parse_init_script
+from unicli.context import Context
+from unicli.util.cmd_parser import Command
+from unicli.util import parse_init_script
 
 
 def cmd_exit(ctx: Context, cmd: Command) -> (int, str):

@@ -1,8 +1,8 @@
-from unidbg.command import CMD_RESULT_FAILED, CMD_RESULT_OK
-from unidbg.context import Context, State
-from unidbg.executor.executor import MemoryPerm
-from unidbg.util.hexdump import hexdump
-from unidbg.util.cmd_parser import Command
+from unicli.command import CMD_RESULT_FAILED, CMD_RESULT_OK
+from unicli.context import Context, State
+from unicli.executor.executor import MemoryPerm
+from unicli.util.hexdump import hexdump
+from unicli.util.cmd_parser import Command
 
 
 def perm_to_str(perm: MemoryPerm) -> str:

@@ -1,13 +1,13 @@
 from typing import Optional
 from .__init__ import CMD_RESULT_FAILED, CMD_RESULT_OK
-from unidbg.context import Context, State
-from unidbg.arch.arch import Arch
-from unidbg.loader.elf_loader import ElfLoader
-from unidbg.util.file_format import get_file_format, FileFormat, get_cpu_arch
-from unidbg.util.cmd_parser import Command
-from unidbg.executor.unicorn_executor import UnicornExecutor
-from unidbg.arch.arch_arm64 import ArchSpecArm64
-from unidbg.loader.loader import LoadedInfo
+from unicli.context import Context, State
+from unicli.arch.arch import Arch
+from unicli.loader.elf_loader import ElfLoader
+from unicli.util.file_format import get_file_format, FileFormat, get_cpu_arch
+from unicli.util.cmd_parser import Command
+from unicli.executor.unicorn_executor import UnicornExecutor
+from unicli.arch.arch_arm64 import ArchSpecArm64
+from unicli.loader.loader import LoadedInfo
 
 
 def _set_current_loaded_info(ctx: Context, loaded_info: Optional[LoadedInfo]):

@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from unidbg.arch.arch import ArchSpec
+from unicli.arch.arch import ArchSpec
 from unicorn.arm64_const import *
 
 g_general_regs_arm64 = [

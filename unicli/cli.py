@@ -71,7 +71,7 @@ register_cmd(CMDS, "hook_code", "hc", handler=cmd_hook_code)
 
 
 def main():
-    print('UniDbg %s' % __version__)
+    print('UniCli %s' % __version__)
     print('Type "help" for more information.')
 
     ctx = Context(commands=CMDS, usage=USAGE)

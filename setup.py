@@ -2,23 +2,23 @@
 import os, re
 from setuptools import setup, find_namespace_packages
 
-with open(os.path.join("unidbg", "__init__.py"), encoding="utf8") as f:
+with open(os.path.join("unicli", "__init__.py"), encoding="utf8") as f:
   version = re.search(r'__version__ = "(.*?)"', f.read()).group(1)
 
 setup(
-  name='unidbg',
+  name='unicli',
   version=version,
   python_requires='>=3.6',
   description='An interactive command line debugger for unicorn',
-  url='http://github.com/sandin/unidbg',
+  url='http://github.com/sandin/unicli',
   author='lds2012',
   author_email='lds2012@gmail.com',
   license='MIT',
   include_package_data=True, 
-  packages=find_namespace_packages(include=['unidb.*', "unidb"]),
+  packages=find_namespace_packages(include=['unicli.*', "unicli"]),
   entry_points={
     'console_scripts': [
-      'unidbg = unidb.cli:main'
+      'unicli = unicli.cli:main'
     ]
   },
   install_requires='''

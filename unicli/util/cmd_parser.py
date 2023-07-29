@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-from unidbg.context import Context
+from unicli.context import Context
 
 
 def tokenize(line: str, split_tokens: list[str], wrap_tokens: list[str], end_tokens: list[str]):
