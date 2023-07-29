@@ -56,6 +56,18 @@ def test_parse_args():
     command.args[1] = "0x4061C"
 
 
+def test_get_flags():
+    ctx = Context()
+
+    command = parse_command(ctx, 'mem_read 0x38550 0x38550+0x1000 --out "/you/path/output.bin" -f')
+    assert command.cmd == "mem_read"
+    assert len(command.args) == 5
+    assert command.get_addr_arg("start_addr", 0, 0) == 0x38550
+    assert command.get_addr_arg("end_addr", 1, 0) == (0x38550+0x1000)
+    assert command.get_str_flag(["o", "out"], 2, "") == "/you/path/output.bin"
+    assert command.has_flag(["f", "force"], 2, False) is True
+
+
 def test_parse_address():
     # valid format
     assert parse_address("0x38550") == 0x38550

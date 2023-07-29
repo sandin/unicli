@@ -174,6 +174,36 @@ class Command(object):
         args = self.args[index+1:]
         return Command(self.ctx, cmd, args)
 
+    def get_str_flag(self, names: list[str], start_index: int, def_val: Optional[str]) -> Optional[str]:
+        i = start_index
+        while i < len(self.args):
+            arg = self.args[i]
+            if arg.startswith('-') and len(arg) > 2:
+                if arg[1] == '-':
+                    flag_name = arg[2:]  # --flag
+                else:
+                    flag_name = arg[1:]  # -f
+                if flag_name in names:
+                    i += 1
+                    if i < len(self.args):
+                        return self.args[i]
+            i += 1
+        return def_val
+
+    def has_flag(self, names: list[str], start_index: int, def_val: bool) -> bool:
+        i = start_index
+        while i < len(self.args):
+            arg = self.args[i]
+            if arg.startswith('-') and len(arg) >= 2:
+                if arg[1] == '-':
+                    flag_name = arg[2:]  # --flag
+                else:
+                    flag_name = arg[1:]  # -f
+                if flag_name in names:
+                    return True
+            i += 1
+        return def_val
+
 
 def parse_command(ctx: Context, line: str) -> Optional[Command]:
     parts = tokenize(line, [' '], ['"', "'"], ['#'])

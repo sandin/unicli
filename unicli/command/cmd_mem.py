@@ -1,6 +1,7 @@
 from unicli.command import CMD_RESULT_FAILED, CMD_RESULT_OK
 from unicli.context import Context, State
 from unicli.executor.executor import MemoryPerm
+from unicli.util import write_content_to_file
 from unicli.util.hexdump import hexdump
 from unicli.util.cmd_parser import Command
 
@@ -45,11 +46,20 @@ def cmd_mem_read(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         return CMD_RESULT_FAILED, err
 
+    # --out <out>
+    out = cmd.get_str_flag(["o", "out"], 2, None)
+
     data, err = ctx.executor.mem_read(ctx.base_addr + address, size)
+    start_addr_s = ctx.arch.format_address(address)
+    end_addr_s = ctx.arch.format_address(address + size)
     if err is not None:
-        err = "can not read memory at 0x%x - 0x%x, %s" % (address, address + size, err)
+        err = "can not read memory at %s - %s, %s" % (start_addr_s, end_addr_s, err)
         return CMD_RESULT_FAILED, err
-    hexdump(data, off=address)
+    if out is not None:
+        write_content_to_file(data, out)
+        print("%s - %s %d bytes have been saved to the file: %s" % (start_addr_s, end_addr_s, len(data), out))
+    else:
+        hexdump(data, off=address)
     return CMD_RESULT_OK, None
 
 

@@ -14,7 +14,7 @@ from .context import Context, execute_command
 from .util import register_cmd, parse_init_script
 from .util.cmd_parser import parse_command
 
-USAGE = """Usage: <command> <args..>
+USAGE = """Usage: <command> <args..> <flags..>
  common:
      s script <filename>                        Load a script file
     st set <name> <value>                       Set a local variable
@@ -32,6 +32,7 @@ USAGE = """Usage: <command> <args..>
     mm mem_map <abs_addr> <size> [<port>]       Map a piece of virtual memory
     mw mem_write <rel_addr> <data>              Write data to memory at address
     mr mem_read <rel_addr> <size>               Read the memory at address
+                [--out <output_file>]           Dump memory to a file
     ml mem_list                                 List all mapped memory range
 
  register:

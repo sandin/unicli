@@ -15,11 +15,11 @@ def cmd_emu_start(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         return CMD_RESULT_FAILED, err
 
-    timeout, err = cmd.get_addr_arg("timeout", 2, 0)
+    timeout, err = cmd.get_int_arg("timeout", 2, 0)
     if err is not None:
         return CMD_RESULT_FAILED, err
 
-    count, err = cmd.get_addr_arg("count", 3, 0)
+    count, err = cmd.get_int_arg("count", 3, 0)
     if err is not None:
         return CMD_RESULT_FAILED, err
 

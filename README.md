@@ -196,7 +196,7 @@ Emulation done, range: 0x00000407e0 - 0x0000040844
 
 We can see that because we previously hooked the address `0x0000040800` , so we can observe the value in the `X8` register at the time of execution to that address. And we can also observe the value of `0x00000fbab8` memory at the time of execution to the address `0x000004083c`.
 
-​              
+​               
 
 ### Memory Read
 
@@ -214,7 +214,18 @@ In addition to the hook, you can also wait for the simulation to finish executin
 
 Bingo! These memories on this example were originally placed with some encrypted strings, but after simulation execution now you can see the decrypted string in plaintext.
 
-​                             
+​              
+
+### Memory Dump
+
+If you need a large range of memory block data, you can also dump that memory into a file and then analyze them using other tools.
+
+```
+>>> mem_read 0xFBAB8 0x100000 --out dump_memory_FBAB8.bin
+0x00000fbab8 - 0x00001fbab8 1048576 bytes have been saved to the file: dump_memory_FBAB8.bin
+```
+
+​                                
 
 ### Register Read
 
