@@ -178,7 +178,7 @@ class Command(object):
         i = start_index
         while i < len(self.args):
             arg = self.args[i]
-            if arg.startswith('-') and len(arg) > 2:
+            if arg.startswith('-') and len(arg) >= 2:
                 if arg[1] == '-':
                     flag_name = arg[2:]  # --flag
                 else:
@@ -188,6 +188,12 @@ class Command(object):
                     if i < len(self.args):
                         return self.args[i]
             i += 1
+        return def_val
+
+    def get_int_flag(self, names: list[str], start_index: int, def_val: int) -> int:
+        flag = self.get_str_flag(names, start_index, None)
+        if flag is not None:
+            return parse_number(flag, def_val)
         return def_val
 
     def has_flag(self, names: list[str], start_index: int, def_val: bool) -> bool:

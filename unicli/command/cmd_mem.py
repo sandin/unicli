@@ -4,6 +4,7 @@ from unicli.executor.executor import MemoryPerm
 from unicli.util import write_content_to_file
 from unicli.util.hexdump import hexdump
 from unicli.util.cmd_parser import Command
+from unicli.util.memory import page_start, page_align
 
 
 def perm_to_str(perm: MemoryPerm) -> str:
@@ -104,11 +105,14 @@ def cmd_mem_map(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         return CMD_RESULT_FAILED, err
 
+    address = page_start(address)
+    size = page_align(size)
+
     addr, err = ctx.executor.mem_map(address, size, prot)
     start_addr_s = ctx.arch.format_address(address)
     end_addr_s = ctx.arch.format_address(address + size)
     if err is not None:
-        err = "can not map memory at %s- %sx %s, %s" % (start_addr_s, end_addr_s, perm_to_str(prot), err)
+        err = "can not map memory at %s - %s %s, %s" % (start_addr_s, end_addr_s, perm_to_str(prot), err)
         return CMD_RESULT_FAILED, err
     print("%s - %s %s" % (start_addr_s, end_addr_s, perm_to_str(prot)))
     return CMD_RESULT_OK, None

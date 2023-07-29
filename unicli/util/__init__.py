@@ -19,3 +19,7 @@ def write_content_to_file(content: bytes, filename: str) -> bool:
         f.write(content)
         return True
 
+
+def read_file_content(f, offset: int, size: int) -> bytes:
+    f.seek(offset)
+    return f.read(size)

@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from unicli.arch.arch import ArchSpec
 from unicli.executor.executor import Executor
 from unicli.loader.loader import Loader, LoadedInfo
+from unicli.util.file_format import FileFormat
 
 
 class State(IntEnum):
@@ -16,7 +17,7 @@ class Context:
     commands: dict[str, any] = field(default_factory=dict)
     usage: str = None
     executor: Optional[Executor] = None
-    loader: Optional[Loader] = None
+    loader: dict[FileFormat, Loader] = field(default_factory=dict)
     loaded: list[LoadedInfo] = field(default_factory=list)
     arch: Optional[ArchSpec] = None
     base_addr: int = 0

@@ -1,5 +1,4 @@
-from collections import OrderedDict
-from unicli.arch.arch import ArchSpec
+from unicli.arch.arch import ArchSpec, Arch
 from unicorn.arm64_const import *
 
 g_general_regs_arm64 = [
@@ -29,6 +28,9 @@ g_general_regs_arm64_id_to_name = {
 
 
 class ArchSpecArm64(ArchSpec):
+
+    def arch(self) -> Arch:
+        return Arch.ARCH_ARM64
 
     def address_size(self) -> int:
         return 8

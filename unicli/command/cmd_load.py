@@ -3,11 +3,13 @@ from .__init__ import CMD_RESULT_FAILED, CMD_RESULT_OK
 from unicli.context import Context, State
 from unicli.arch.arch import Arch
 from unicli.loader.elf_loader import ElfLoader
-from unicli.util.file_format import get_file_format, FileFormat, get_cpu_arch
+from unicli.util.file_format import get_file_format, FileFormat, get_cpu_arch, str_to_file_format, str_to_cpu_arch, \
+    cpu_arch_to_str
 from unicli.util.cmd_parser import Command
 from unicli.executor.unicorn_executor import UnicornExecutor
 from unicli.arch.arch_arm64 import ArchSpecArm64
 from unicli.loader.loader import LoadedInfo
+from ..loader.raw_loader import RawLoader
 
 
 def _set_current_loaded_info(ctx: Context, loaded_info: Optional[LoadedInfo]):
@@ -24,29 +26,54 @@ def cmd_load(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         return CMD_RESULT_FAILED, err
 
-    # Create Loader
-    file_format = get_file_format(filename)
-    if file_format == FileFormat.ELF:
-        ctx.loader = ElfLoader()
-    # TODO: if file_format == FileFormat.PE:
-    #   context.loader = PELoader()
-    # TODO: if file_format == FileFormat.MACH_O:
-    #   context.loader = MachOLoader()
+    base_addr = cmd.get_int_flag(['b', 'base'], 1, 0)
+    input_format = cmd.get_str_flag(['f', 'format'], 1, None)
+    input_arch = cmd.get_str_flag(['a', 'arch'], 1, None)
+    offset = cmd.get_int_flag(['o', 'offset'], 1, 0)
+
+    # check file format
+    if input_format is not None:
+        file_format = str_to_file_format(input_format)
     else:
-        return CMD_RESULT_FAILED, "unsupported file format %s" % filename
+        file_format = get_file_format(filename)
+
+    # Create Loader
+    if file_format not in ctx.loader:
+        if file_format == FileFormat.RAW:
+            if input_arch is None:
+                return CMD_RESULT_FAILED, "missing <arch> flag"
+            ctx.loader[file_format] = RawLoader()
+        elif file_format == FileFormat.ELF:
+            ctx.loader[file_format] = ElfLoader()
+        # TODO: if file_format == FileFormat.PE:
+        #   ctx.loader[file_format] = PELoader()
+        # TODO: if file_format == FileFormat.MACH_O:
+        #   ctx.loader[file_format] = MachOLoader()
+        else:
+            return CMD_RESULT_FAILED, "unsupported file format %s" % filename
 
     # Arch Spec helper
-    arch = get_cpu_arch(filename)
-    if arch == Arch.ARCH_ARM64:
-        ctx.arch = ArchSpecArm64()
+    if input_arch is not None:
+        arch = str_to_cpu_arch(input_arch)
     else:
-        return CMD_RESULT_FAILED, "unsupported arch %d" % arch
+        arch = get_cpu_arch(filename)
+
+    if ctx.arch is None:
+        if arch == Arch.ARCH_ARM64:
+            ctx.arch = ArchSpecArm64()
+        else:
+            return CMD_RESULT_FAILED, "unsupported arch %d" % arch
+    else:
+        if ctx.arch.arch() != arch:
+            return CMD_RESULT_FAILED, "can't load files from %s arch file, current arch is %s" \
+                                  % (cpu_arch_to_str(arch), cpu_arch_to_str(ctx.arch.arch()))
 
     # Create Executor
-    ctx.executor = UnicornExecutor(ctx, arch)
+    if ctx.executor is None:
+        ctx.executor = UnicornExecutor(ctx, arch)
 
     # Load ELF/PE/Mach-O file into virtual memory
-    loaded_info, err = ctx.loader.load(ctx.executor, filename)
+    loaded_info, err = ctx.loader[file_format].load(ctx.executor, filename, base_addr, offset)
     if err is not None:
         return CMD_RESULT_FAILED, "can not load %s, %s" % (filename, err)
     ctx.loaded.append(loaded_info)

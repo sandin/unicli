@@ -5,6 +5,7 @@ import lief
 from .loader import Loader, LoadedInfo
 from unicli.executor.executor import Executor, MemoryPerm
 from unicli.util.memory import page_start, page_end, page_offset, PAGE_SIZE
+from ..util import read_file_content
 
 
 class ElfLoader(Loader):
@@ -12,7 +13,7 @@ class ElfLoader(Loader):
     Loader for ELF file
     """
 
-    def load(self, executor: Executor, filename: str) -> (LoadedInfo, str):
+    def load(self, executor: Executor, filename: str, base_addr: int = 0, offset: int = 0) -> (LoadedInfo, str):
         loaded_info = LoadedInfo(filename=filename)
         elf = lief.ELF.parse(filename)
         if elf.format != lief.EXE_FORMATS.ELF:
@@ -28,13 +29,12 @@ class ElfLoader(Loader):
         if loaded_info.load_size == 0:
             return None, "Can not found loadable segments"
 
-        addr = min_vaddr
-        start, err = executor.mem_map(0, loaded_info.load_size, MemoryPerm.PROT_ALL)
+        start, err = executor.mem_map(base_addr, loaded_info.load_size, MemoryPerm.PROT_ALL)
         if err is not None:
             return None, "Can not map memory for size 0x%x, %s" % (loaded_info.load_size, err)
         print("Map memory reserve address space [0x%x - 0x%x]" % (start, start + loaded_info.load_size))
         loaded_info.load_start = start
-        loaded_info.load_bias = start - addr
+        loaded_info.load_bias = start - min_vaddr
 
         # LoadSegments
         with open(filename, "rb") as f:
@@ -62,7 +62,7 @@ class ElfLoader(Loader):
                     return None, "Invalid segment file end=%d, file size=%d" % (file_end, total_file_size)
 
                 if file_length != 0:
-                    file_bytes = self._read_file_content(f, file_page_start, file_length)
+                    file_bytes = read_file_content(f, file_page_start, file_length)
                     executor.mem_write(seg_page_start, file_bytes)
                     if err is not None:
                         return None, "Can not write memory [0x%x - 0x%x], %s" % (seg_page_start, seg_page_start + file_length, err)
@@ -84,11 +84,6 @@ class ElfLoader(Loader):
                         return None, "Can not write memory [0x%x - 0x%x], %s" % (seg_file_end, seg_file_end + len(zeros), err)
                     print("Fill memory with zeros for .bss section [0x%x - 0x%x]" % (seg_file_end, seg_file_end + len(zeros)))
         return loaded_info, None
-
-    @staticmethod
-    def _read_file_content(f, offset: int, size: int) -> bytes:
-        f.seek(offset)
-        return f.read(size)
 
     @staticmethod
     def _get_load_range(elf: lief.ELF.Binary) -> (int, int):

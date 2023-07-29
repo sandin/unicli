@@ -1,12 +1,12 @@
 import os.path
 import sys
-from prompt_toolkit import prompt
+from prompt_toolkit import PromptSession
 
 from .__init__ import __version__
 from .command import CMD_RESULT_EXIT, CMD_RESULT_FAILED
 from .command.cmd_hook import cmd_hook_block, cmd_hook_code
 from .command.cmd_emu import cmd_emu_start, cmd_emu_stop
-from .command.cmd_common import cmd_exit, cmd_help, cmd_script, cmd_set, cmd_unset, cmd_set_base
+from .command.cmd_common import cmd_exit, cmd_help, cmd_script, cmd_set, cmd_unset, cmd_set_base, cmd_disasm
 from .command.cmd_load import cmd_load, cmd_unload, cmd_load_list
 from .command.cmd_mem import cmd_mem_list, cmd_mem_read, cmd_mem_map, cmd_mem_write
 from .command.cmd_reg import cmd_reg_write, cmd_reg_read
@@ -25,6 +25,10 @@ USAGE = """Usage: <command> <args..> <flags..>
      
  load:
     lf load <filename>                          Load an ELF/PE/Mach-O file as a module
+            [--format <format>]                 File format: elf, pe, macho, raw
+            [--arch <arch>]                     Cpu arch: arm, arm64, x86, x86_64
+            [--base <address>]                  Base address for load
+            [--offset <offset>]                 Offset for raw file
     lu unload <filename>                        Unload a module
     ll load_list                                List all loaded modules
      
@@ -56,6 +60,7 @@ register_cmd(CMDS, "script", "s", handler=cmd_script)
 register_cmd(CMDS, "set", "st", handler=cmd_set)
 register_cmd(CMDS, "unset", "us", handler=cmd_unset)
 register_cmd(CMDS, "set_base", "sb", handler=cmd_set_base)
+register_cmd(CMDS, "disasm", "di", handler=cmd_disasm)
 register_cmd(CMDS, "load", "l", handler=cmd_load)
 register_cmd(CMDS, "unload", "lu", handler=cmd_unload)
 register_cmd(CMDS, "load_list", "ll", handler=cmd_load_list)
@@ -83,6 +88,7 @@ def main():
         ctx.padding_cmds += parse_init_script(init_script)
         print("load init script file `%s`" % init_script)
 
+    session = PromptSession()
     while True:
         if len(ctx.padding_cmds) > 0:
             line = ctx.padding_cmds[0]
@@ -90,7 +96,7 @@ def main():
             if line.strip() and not line.startswith("#"):
                 print("%s %s" % (ctx.prompt, line))
         else:
-            line = prompt("%s " % ctx.prompt)
+            line = session.prompt("%s " % ctx.prompt)
         if not line.strip() or line.startswith("#"):
             continue
 

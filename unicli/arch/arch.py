@@ -2,7 +2,7 @@ from enum import IntEnum
 
 
 class Arch(IntEnum):
-    ARCH_NONE = 0
+    ARCH_UNKNOWN = 0
     ARCH_ARM = 1
     ARCH_ARM64 = 2
     ARCH_X86 = 3
@@ -13,6 +13,12 @@ class ArchSpec(object):
     """
     Interface ArchSpec
     """
+
+    def arch(self) -> Arch:
+        """
+        Get current arch
+        """
+        pass
 
     def address_size(self) -> int:
         """

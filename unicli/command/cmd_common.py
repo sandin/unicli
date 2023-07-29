@@ -1,5 +1,5 @@
 from .__init__ import CMD_RESULT_EXIT, CMD_RESULT_OK, CMD_RESULT_FAILED
-from unicli.context import Context
+from unicli.context import Context, State
 from unicli.util.cmd_parser import Command
 from unicli.util import parse_init_script
 
@@ -19,7 +19,7 @@ def cmd_script(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         return CMD_RESULT_FAILED, err
 
-    ctx.padding_cmds += parse_init_script(filename)
+    ctx.padding_cmds = parse_init_script(filename) + ctx.padding_cmds
     print("load script file `%s`" % filename)
     return CMD_RESULT_OK, None
 
@@ -59,4 +59,23 @@ def cmd_set_base(ctx: Context, cmd: Command) -> (int, str):
 
     ctx.base_addr = address
     print("Set base address 0x%x" % (address))
+    return CMD_RESULT_OK, None
+
+
+def cmd_disasm(ctx: Context, cmd: Command) -> (int, str):
+    if ctx.state != State.LOADED:
+        return CMD_RESULT_FAILED, "invalid context state"
+
+    address, err = cmd.get_addr_arg("addr", 0, -1)
+    if err is not None:
+        return CMD_RESULT_FAILED, err
+
+    size, err = cmd.get_int_arg("size", 1, -1)
+    if err is not None:
+        return CMD_RESULT_FAILED, err
+
+    ret, err = ctx.executor.disasm(ctx.base_addr + address, size)
+    if err is not None:
+        err = "can not disassemble code at 0x%x - 0x%x, %s" % (address, address + size, err)
+        return CMD_RESULT_FAILED, err
     return CMD_RESULT_OK, None

@@ -127,3 +127,12 @@ class Executor(object):
         :return: (success, error)
         """
         pass
+
+    def disasm(self, address: int, size: int) -> (bool, str):
+        """
+        Disassemble code
+        :param address: target address
+        :param size: code size
+        :return: (success, error)
+        """
+        pass
