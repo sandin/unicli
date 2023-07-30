@@ -1,17 +1,17 @@
 from .__init__ import CMD_RESULT_FAILED, CMD_RESULT_OK
-from unicli.context import Context, State
+from unicli.context import Context, State, state_is_loaded, state_is_running
 from unicli.util.cmd_parser import Command
 
 
 def cmd_emu_start(ctx: Context, cmd: Command) -> (int, str):
-    if ctx.state != State.LOADED:
+    if not state_is_loaded(ctx.state):
         return CMD_RESULT_FAILED, "invalid context state"
 
     start_addr, err = cmd.get_addr_arg("start_addr", 0, -1)
     if err is not None:
         return CMD_RESULT_FAILED, err
 
-    end_addr, err = cmd.get_addr_arg("end_addr", 1, -1)
+    end_addr, err = cmd.get_addr_arg("end_addr", 1, 0)
     if err is not None:
         return CMD_RESULT_FAILED, err
 
@@ -24,9 +24,13 @@ def cmd_emu_start(ctx: Context, cmd: Command) -> (int, str):
         return CMD_RESULT_FAILED, err
 
     start_addr_s = ctx.arch.format_address(start_addr)
-    end_addr_s = ctx.arch.format_address(end_addr)
+    end_addr_s = ctx.arch.format_address(end_addr) if end_addr != -1 else ""
+    ctx.state = State.RUNNING
     print("Start emulation, range: %s - %s" % (start_addr_s, end_addr_s))
-    ret, err = ctx.executor.emu_start(ctx.base_addr + start_addr, ctx.base_addr + end_addr, timeout, count)
+    if end_addr != 0:
+        ret, err = ctx.executor.emu_start(ctx.base_addr + start_addr, ctx.base_addr + end_addr, timeout, count)
+    else:
+        ret, err = ctx.executor.emu_start(ctx.base_addr + start_addr, 0, timeout, count)
     if err is not None:
         err = "can not start emulation at %s - %s, %s" % (start_addr_s, end_addr_s, err)
         return CMD_RESULT_FAILED, err
@@ -35,7 +39,7 @@ def cmd_emu_start(ctx: Context, cmd: Command) -> (int, str):
 
 
 def cmd_emu_stop(ctx: Context, cmd: Command) -> (int, str):
-    if ctx.state != State.LOADED:
+    if not state_is_running(ctx.state):
         return CMD_RESULT_FAILED, "invalid context state"
 
     ret, err = ctx.executor.emu_stop()
@@ -43,4 +47,5 @@ def cmd_emu_stop(ctx: Context, cmd: Command) -> (int, str):
         err = "can not stop the emulation"
         return CMD_RESULT_FAILED, err
     print("Stop the emulation")
+    ctx.state = State.LOADED
     return CMD_RESULT_OK, None

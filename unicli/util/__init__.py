@@ -15,6 +15,9 @@ def parse_init_script(filename: str) -> list[str]:
 
 
 def write_content_to_file(content: bytes, filename: str) -> bool:
+    dir_name = os.path.dirname(filename)
+    if dir_name and not os.path.exists(dir_name):
+        os.makedirs(dir_name, exist_ok=True)
     with open(filename, "bw") as f:
         f.write(content)
         return True

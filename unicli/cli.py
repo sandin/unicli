@@ -10,16 +10,18 @@ from .command.cmd_common import cmd_exit, cmd_help, cmd_script, cmd_set, cmd_uns
 from .command.cmd_load import cmd_load, cmd_unload, cmd_load_list
 from .command.cmd_mem import cmd_mem_list, cmd_mem_read, cmd_mem_map, cmd_mem_write
 from .command.cmd_reg import cmd_reg_write, cmd_reg_read
+from .command.cmd_step import cmd_step_inst, cmd_step_block, cmd_step_address
 from .context import Context, execute_command
 from .util import register_cmd, parse_init_script
 from .util.cmd_parser import parse_command
 
 USAGE = """Usage: <command> <args..> <flags..>
  common:
-     s script <filename>                        Load a script file
-    st set <name> <value>                       Set a local variable
-    us unset <name>                             Unset a local variable
-    sb set_base <abs_addr>                      Set base address for all relative addresses
+     f script <filename>                        Load a script file
+     s set <name> <value>                       Set a local variable
+     u unset <name>                             Unset a local variable
+     b set_base <abs_addr>                      Set base address for all relative addresses
+     d disasm <rel_addr>                        Disassemble code at address
      h help                                     Print help information
      e exit                                     Exit the program   
      
@@ -51,17 +53,22 @@ USAGE = """Usage: <command> <args..> <flags..>
     es emu_start <start_addr> <end_addr>        Start emulation
                  [<timeout> <count>]
     et emu_stop                                 Stop emulation        
+    
+ step:
+    si step_inst                                Step to the next inst
+    sb step_block                               Step to the next block
+    st step_to <rel_addr>                       Step to the address
 """
 
 CMDS = {}
 register_cmd(CMDS, "exit", ".exit", "exit()", "e", handler=cmd_exit)
 register_cmd(CMDS, "help", "h", handler=cmd_help)
-register_cmd(CMDS, "script", "s", handler=cmd_script)
-register_cmd(CMDS, "set", "st", handler=cmd_set)
-register_cmd(CMDS, "unset", "us", handler=cmd_unset)
-register_cmd(CMDS, "set_base", "sb", handler=cmd_set_base)
-register_cmd(CMDS, "disasm", "di", handler=cmd_disasm)
-register_cmd(CMDS, "load", "l", handler=cmd_load)
+register_cmd(CMDS, "script", "f", handler=cmd_script)
+register_cmd(CMDS, "set", "s", handler=cmd_set)
+register_cmd(CMDS, "unset", "u", handler=cmd_unset)
+register_cmd(CMDS, "set_base", "b", handler=cmd_set_base)
+register_cmd(CMDS, "disasm", "d", handler=cmd_disasm)
+register_cmd(CMDS, "load", "lf", handler=cmd_load)
 register_cmd(CMDS, "unload", "lu", handler=cmd_unload)
 register_cmd(CMDS, "load_list", "ll", handler=cmd_load_list)
 register_cmd(CMDS, "mem_list", "ml", handler=cmd_mem_list)
@@ -74,6 +81,9 @@ register_cmd(CMDS, "emu_start", "es", handler=cmd_emu_start)
 register_cmd(CMDS, "emu_stop", "et", handler=cmd_emu_stop)
 register_cmd(CMDS, "hook_block", "hb", handler=cmd_hook_block)
 register_cmd(CMDS, "hook_code", "hc", handler=cmd_hook_code)
+register_cmd(CMDS, "step_inst", "si", handler=cmd_step_inst)
+register_cmd(CMDS, "step_block", "sb", handler=cmd_step_block)
+register_cmd(CMDS, "step_to", "st", handler=cmd_step_address)
 
 
 def main():

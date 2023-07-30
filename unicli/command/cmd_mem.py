@@ -1,5 +1,5 @@
 from unicli.command import CMD_RESULT_FAILED, CMD_RESULT_OK
-from unicli.context import Context, State
+from unicli.context import Context, state_is_loaded
 from unicli.executor.executor import MemoryPerm
 from unicli.util import write_content_to_file
 from unicli.util.hexdump import hexdump
@@ -19,7 +19,7 @@ def perm_to_str(perm: MemoryPerm) -> str:
 
 
 def cmd_mem_list(ctx: Context, cmd: Command) -> (int, str):
-    if ctx.state != State.LOADED:
+    if not state_is_loaded(ctx.state):
         return CMD_RESULT_FAILED, "invalid context state"
 
     regions, err = ctx.executor.mem_regions()
@@ -34,7 +34,7 @@ def cmd_mem_list(ctx: Context, cmd: Command) -> (int, str):
 
 
 def cmd_mem_read(ctx: Context, cmd: Command) -> (int, str):
-    if ctx.state != State.LOADED:
+    if not state_is_loaded(ctx.state):
         return CMD_RESULT_FAILED, "invalid context state"
 
     # <addr>
@@ -65,7 +65,7 @@ def cmd_mem_read(ctx: Context, cmd: Command) -> (int, str):
 
 
 def cmd_mem_write(ctx: Context, cmd: Command) -> (int, str):
-    if ctx.state != State.LOADED:
+    if not state_is_loaded(ctx.state):
         return CMD_RESULT_FAILED, "invalid context state"
 
     # <addr>
@@ -87,7 +87,7 @@ def cmd_mem_write(ctx: Context, cmd: Command) -> (int, str):
 
 
 def cmd_mem_map(ctx: Context, cmd: Command) -> (int, str):
-    if ctx.state != State.LOADED:
+    if not state_is_loaded(ctx.state):
         return CMD_RESULT_FAILED, "invalid context state"
 
     # <address>

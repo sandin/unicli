@@ -59,6 +59,14 @@ class ArchSpec(object):
         :param def_val: default value
         :return: register name
         """
+        pass
+
+    def get_instruction_pointer_reg_num(self) -> int:
+        """
+        Get Register name of instrument pointer(IP, PC)
+        :return: register number(id)
+        """
+        pass
 
     def get_all_reg_num(self) -> list[int]:
         """

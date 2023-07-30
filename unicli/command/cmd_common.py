@@ -1,5 +1,5 @@
 from .__init__ import CMD_RESULT_EXIT, CMD_RESULT_OK, CMD_RESULT_FAILED
-from unicli.context import Context, State
+from unicli.context import Context, state_is_loaded
 from unicli.util.cmd_parser import Command
 from unicli.util import parse_init_script
 
@@ -63,7 +63,7 @@ def cmd_set_base(ctx: Context, cmd: Command) -> (int, str):
 
 
 def cmd_disasm(ctx: Context, cmd: Command) -> (int, str):
-    if ctx.state != State.LOADED:
+    if not state_is_loaded(ctx.state):
         return CMD_RESULT_FAILED, "invalid context state"
 
     address, err = cmd.get_addr_arg("addr", 0, -1)

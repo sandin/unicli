@@ -1,6 +1,6 @@
 import sys
 from unicli.command import CMD_RESULT_FAILED, CMD_RESULT_OK
-from unicli.context import Context, State
+from unicli.context import Context, State, state_is_loaded
 from unicli.util.cmd_parser import Command
 
 
@@ -9,7 +9,7 @@ ALL_REG_NAME = "all"
 
 
 def cmd_reg_read(ctx: Context, cmd: Command) -> (int, str):
-    if ctx.state != State.LOADED:
+    if not state_is_loaded(ctx.state):
         return CMD_RESULT_FAILED, "invalid context state"
 
     regs_batch = []
@@ -47,7 +47,7 @@ def cmd_reg_read(ctx: Context, cmd: Command) -> (int, str):
 
 
 def cmd_reg_write(ctx: Context, cmd: Command) -> (int, str):
-    if ctx.state != State.LOADED:
+    if not state_is_loaded(ctx.state):
         return CMD_RESULT_FAILED, "invalid context state"
 
     regs_batch = []

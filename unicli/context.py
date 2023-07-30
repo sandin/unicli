@@ -10,6 +10,7 @@ from unicli.util.file_format import FileFormat
 class State(IntEnum):
     INVALID = 0
     LOADED = 1
+    RUNNING = 2
 
 
 @dataclass
@@ -33,4 +34,12 @@ def execute_command(ctx: Context, command) -> (int, str):
         return cmd_handle_func(ctx, command)
     else:
         return False, "unsupported command: `%s`" % command.cmd
+
+
+def state_is_loaded(state: State) -> bool:
+    return state >= State.LOADED
+
+
+def state_is_running(state: State) -> bool:
+    return state == State.RUNNING
 

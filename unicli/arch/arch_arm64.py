@@ -61,3 +61,7 @@ class ArchSpecArm64(ArchSpec):
 
     def get_all_reg_num(self) -> (list[int], str):
         return g_general_regs_arm64
+
+    def get_instruction_pointer_reg_num(self) -> int:
+        return UC_ARM64_REG_PC
+
