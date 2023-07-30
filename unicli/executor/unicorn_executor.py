@@ -4,6 +4,7 @@ from capstone import *
 from unicli.arch.arch import Arch
 from unicli.context import Context, execute_command
 from unicli.util.cmd_parser import Command
+from unicli.tracker.tracker import Tracker, StopCondition, StopConditionType
 
 
 class UnicornExecutor(Executor):
@@ -17,6 +18,7 @@ class UnicornExecutor(Executor):
             self.cs = Cs(CS_ARCH_ARM64, CS_MODE_ARM)  # type: Cs
         else:
             raise Exception("Unsupported arch")
+        self.tracker = Tracker()
         self.block_hooks = {}
         self.code_hooks = {}
         self._setup_hooks()
@@ -39,6 +41,11 @@ class UnicornExecutor(Executor):
         ctx = executor.context  # type: Context
         rel_address = address - ctx.base_addr
         address_s = ctx.arch.format_address(rel_address)
+
+        if not executor.tracker.on_new_block(address, size):
+            executor.emu_stop()
+            return  # breakpoint
+
         block_name = "blk_%x" % rel_address
         print("%s %s:" % (address_s, block_name))
 
@@ -51,6 +58,10 @@ class UnicornExecutor(Executor):
     def hook_code(mu: unicorn.Uc, address: int, size: int, user_data: any):
         executor = user_data # type: UnicornExecutor
         ctx = executor.context  # type: Context
+
+        if not executor.tracker.on_new_inst(address, size):
+            executor.emu_stop()
+            return  # breakpoint
 
         # user's hooks
         # the callback of uc_hook is called before the instruction is executed
@@ -149,6 +160,8 @@ class UnicornExecutor(Executor):
             if end_addr == 0 and self._exit_enabled is False:
                 self.mu.ctl_exits_enabled(True)
                 self._exit_enabled = True
+                if self.tracker.get_stop_condition() is None:
+                    self.tracker.set_stop_condition(StopCondition(StopConditionType.ON_NEXT_INST, 0))
             self.mu.emu_start(start_addr, end_addr, timeout, count)
             return True, None
         except UcError as e:
@@ -159,6 +172,7 @@ class UnicornExecutor(Executor):
             self.mu.emu_stop()
             self.mu.ctl_exits_enabled(False)
             self._exit_enabled = False
+            self.tracker.set_stop_condition(None)
             return True, None
         except UcError as e:
             return False, e
@@ -184,3 +198,15 @@ class UnicornExecutor(Executor):
             return False, "the address has not been hooked"
         del self.code_hooks[address]
         return True, None
+
+    def step_inst(self) -> (bool, str):
+        self.tracker.set_stop_condition(StopCondition(StopConditionType.ON_NEXT_INST, 0))
+        return self.emu_start(self.tracker.get_next_address(), 0, 0, 0)
+
+    def step_block(self) -> (bool, str):
+        self.tracker.set_stop_condition(StopCondition(StopConditionType.ON_NEXT_BLOCK, 0))
+        return self.emu_start(self.tracker.get_next_address(), 0, 0, 0)
+
+    def step_address(self, address: int) -> (bool, str):
+        self.tracker.set_stop_condition(StopCondition(StopConditionType.ON_ADDRESS, address))
+        return self.emu_start(self.tracker.get_next_address(), 0, 0, 0)

@@ -136,3 +136,25 @@ class Executor(object):
         :return: (success, error)
         """
         pass
+
+    def step_inst(self) -> (bool, str):
+        """
+        Step to the next inst
+        :return: (success, error)
+        """
+        pass
+
+    def step_block(self) -> (bool, str):
+        """
+        Step to the next block
+        :return: (success, error)
+        """
+        pass
+
+    def step_address(self, address: int) -> (bool, str):
+        """
+        Step to the address
+        :param address: target address, stop before this address will not execute the inst at this address.
+        :return: (success, error)
+        """
+        pass
