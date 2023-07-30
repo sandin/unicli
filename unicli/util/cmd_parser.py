@@ -10,11 +10,11 @@ def tokenize(line: str, split_tokens: list[str], wrap_tokens: list[str], end_tok
     in_wrap = False
     for i in range(0, len(line)):
         c = line[i]
-        if c in end_tokens:
-            return parts
         if c in wrap_tokens:
             in_wrap = not in_wrap
             continue
+        if not in_wrap and c in end_tokens:
+            return parts
         if not in_wrap and c in split_tokens:
             if len(last_part.strip()) > 0:
                 parts.append(last_part)
@@ -212,7 +212,7 @@ class Command(object):
 
 
 def parse_command(ctx: Context, line: str) -> Optional[Command]:
-    parts = tokenize(line, [' '], ['"', "'"], ['#'])
+    parts = tokenize(line, [' '], ['"', "'", '[', ']'], ['#'])
     if len(parts) > 0:
         c = Command(ctx, None, [])
         c.cmd = parts[0]

@@ -55,6 +55,11 @@ def test_parse_args():
     command.args[0] = "0x4061C"
     command.args[1] = "0x4061C"
 
+    command = parse_command(ctx, 'mem_read [W8, #0x0]')
+    assert command.cmd == "mem_read"
+    assert len(command.args) == 1
+    command.args[0] = "W8, #0x0"
+
 
 def test_get_flags():
     ctx = Context()

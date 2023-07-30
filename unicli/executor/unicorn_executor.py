@@ -44,22 +44,24 @@ class UnicornExecutor(Executor):
 
         # user's hooks
         if rel_address in executor.block_hooks:
-            subcommand = executor.block_hooks[rel_address]
-            execute_command(ctx, subcommand)
+            for subcommand in executor.block_hooks[rel_address]:
+                execute_command(ctx, subcommand)
 
     @staticmethod
     def hook_code(mu: unicorn.Uc, address: int, size: int, user_data: any):
         executor = user_data # type: UnicornExecutor
         ctx = executor.context  # type: Context
 
-        # disassemble code
-        executor.disasm(address, size)
-
         # user's hooks
+        # the callback of uc_hook is called before the instruction is executed
+        # so if you want to post-instruction hook, just hook the next address
         rel_address = address - ctx.base_addr
         if rel_address in executor.code_hooks:
             subcommand = executor.code_hooks[rel_address]
             execute_command(ctx, subcommand)
+
+        # disassemble code
+        executor.disasm(address, size)
 
     @staticmethod
     def hook_intr(mu: unicorn.Uc, intr_num: int, user_data: any):
@@ -145,7 +147,8 @@ class UnicornExecutor(Executor):
     def emu_start(self, start_addr: int, end_addr: int, timeout: int, count: int) -> (bool, str):
         try:
             if end_addr == 0 and self._exit_enabled is False:
-                self.exits_enabled(True)
+                self.mu.ctl_exits_enabled(True)
+                self._exit_enabled = True
             self.mu.emu_start(start_addr, end_addr, timeout, count)
             return True, None
         except UcError as e:
@@ -154,13 +157,16 @@ class UnicornExecutor(Executor):
     def emu_stop(self) -> (bool, str):
         try:
             self.mu.emu_stop()
-            self.exits_enabled(False)
+            self.mu.ctl_exits_enabled(False)
+            self._exit_enabled = False
             return True, None
         except UcError as e:
             return False, e
 
     def add_block_hook(self, address: int, subcommand: Command) -> (bool, str):
-        self.block_hooks[address] = subcommand
+        if address not in self.block_hooks:
+            self.block_hooks[address] = []
+        self.block_hooks[address].append(subcommand)
         return True, None
 
     def del_block_hook(self, address: int) -> (bool, str):

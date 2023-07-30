@@ -25,6 +25,10 @@ mem_write 0x386C8 $nop  # BL sub_45984 ; memset
 mem_write 0x386D0 $nop  # BL sub_45984 ; memset
 
 # hook
+hook_code 0x385c4 reg_read W8
+hook_code 0x38818 reg_read W0
+hook_code 0x38824 reg_read D0
+hook_code 0x38844 reg_read Q0
 hook_code 0x3887c mem_read 0xFB298 0x29
 
 # start emulation
