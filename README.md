@@ -32,7 +32,14 @@ $ pip install -r requirements.txt
 
 > NOTE: Using unicli in python venv is highly recommended!
 
-​                          
+​                            
+
+## Getting Start
+
+* English: [Crack string encryption using unicli](samples/decrypt_string0/README.md)
+* 中文: [使用unicli破解字符串加密算法](samples/decrypt_string1_zh/README.md)
+
+​           
 
 ## Basic Usage
 

@@ -1,0 +1,30 @@
+# load memory
+load samples/decrypt_string1_zh/text_18D2C0.bin --format raw --arch arm64 --base 0x02000000 --offset 0x18D2C0
+load samples/decrypt_string1_zh/data_6E70DC.bin --format raw --arch arm64 --base 0x02000000 --offset 0x6E70DC
+disasm 0x18D2C0 0x18D548-0x18D2C0
+
+mem_map 0x02000000+0x6E8550 0x6EF0F0-0x6E8550  # .bss segment
+mem_list
+
+# initialize stack & registers
+mem_map 0x00010000 8*1024*1024
+set sp 0x00010000+(8*1024*1024)-0x100
+reg_write all 0 sp $sp
+
+# hook
+hook_code 0x18d2cc reg_read x10
+hook_code 0x18d2d4 reg_read x11
+hook_code 0x18d2dc reg_read w12 w13
+hook_code 0x18d2e0 reg_read w12
+hook_code 0x18d2ec reg_read w12 w13
+hook_code 0x18d2f0 reg_read w12
+hook_code 0x18d378 mem_read 0x06e70dc 0xf
+
+# read memory before the emulation
+mem_read 0x06e70dc 0xf
+
+# start emulation
+emu_start 0x18d2c0 0x18d3a4
+
+# read memory after the emulation
+mem_read 0x06e70dc 0xf
