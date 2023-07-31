@@ -11,7 +11,7 @@ mem_map 0x00010000 8*1024*1024
 set sp 0x00010000+(8*1024*1024)-0x100
 reg_write all 0 sp $sp
 
-# hook
+# hook for 1st string
 hook_code 0x18d2cc reg_read x10
 hook_code 0x18d2d4 reg_read x11
 hook_code 0x18d2dc reg_read w12 w13
@@ -20,11 +20,26 @@ hook_code 0x18d2ec reg_read w12 w13
 hook_code 0x18d2f0 reg_read w12
 hook_code 0x18d378 mem_read 0x06e70dc 0xf
 
-# read memory before the emulation
-mem_read 0x06e70dc 0xf
+# hook for 2th string
+hook_code 0x18D388 reg_read x8 x9 x10
+hook_code 0x18D398 reg_read w11 w12  # eor        w11, w11, w12
+hook_code 0x18D39C reg_read w11
 
-# start emulation
-emu_start 0x18d2c0 0x18d3a4
+# start emulation, 1st string
+ctx_save func_init_state
+mem_read 0x06e70dc 0xf+1 # read memory before the emulation
+emu_start 0x18D2C0 0x18D378
+mem_read 0x06e70dc 0xf+1 # read memory after the emulation
 
-# read memory after the emulation
-mem_read 0x06e70dc 0xf
+# start emulation, 2th string
+ctx_restore func_init_state
+mem_read 0x6E70EC 0x20+1
+emu_start 0x18D2C0 0x18D3A4
+mem_read 0x6E70EC 0x20+1
+
+# start emulation, 3rd string
+ctx_restore func_init_state
+mem_read 0x6e7114 0x25+1
+emu_start 0x18D2C0 0x18D3E0
+mem_read 0x6e7114 0x25+1
+

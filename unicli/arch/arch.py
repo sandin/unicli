@@ -27,10 +27,11 @@ class ArchSpec(object):
         """
         pass
 
-    def format_address(self, address: int) -> str:
+    def format_address(self, address: int, uppercase: bool = False) -> str:
         """
         Format address to string
         :param address: address
+        :param uppercase: uppercase or lowercase
         :return: display address string
         """
         pass

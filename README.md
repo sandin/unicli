@@ -51,6 +51,18 @@ UniCli 0.0.1
 Type "help" for more information.
 ```
 
+If you install unicli with source code, then just type:
+```
+$ python -m unicli
+```
+
+If you run it with PyCharm:
+* Create a new Python [Run/Debug Configuration], config and run it:
+  * Module name: `unicli`
+  * Execution:
+    * [x] Emulate terminal in output console
+
+
 ​                                  
 
 ### Load Module

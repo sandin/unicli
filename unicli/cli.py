@@ -4,6 +4,7 @@ from prompt_toolkit import PromptSession
 
 from .__init__ import __version__
 from .command import CMD_RESULT_EXIT, CMD_RESULT_FAILED
+from .command.cmd_ctx import cmd_ctx_save, cmd_ctx_restore, cmd_ctx_delete
 from .command.cmd_hook import cmd_hook_block, cmd_hook_code
 from .command.cmd_emu import cmd_emu_start, cmd_emu_stop
 from .command.cmd_common import cmd_exit, cmd_help, cmd_script, cmd_set, cmd_unset, cmd_set_base, cmd_disasm
@@ -54,6 +55,11 @@ USAGE = """Usage: <command> <args..> <flags..>
                  [<timeout> <count>]
     et emu_stop                                 Stop emulation        
     
+ context:
+    cs ctx_save [<name>]                        Store the last context
+    cr ctx_restore [<name>]                     Restore the context by name
+    cd ctx_del <name>                           Delete the saved context by name
+    
  step:
     si step_inst                                Step to the next inst
     sb step_block                               Step to the next block
@@ -84,6 +90,9 @@ register_cmd(CMDS, "hook_code", "hc", handler=cmd_hook_code)
 register_cmd(CMDS, "step_inst", "si", handler=cmd_step_inst)
 register_cmd(CMDS, "step_block", "sb", handler=cmd_step_block)
 register_cmd(CMDS, "step_to", "st", handler=cmd_step_address)
+register_cmd(CMDS, "cs", "ctx_save", handler=cmd_ctx_save)
+register_cmd(CMDS, "cr", "ctx_restore", handler=cmd_ctx_restore)
+register_cmd(CMDS, "cd", "ctx_del", handler=cmd_ctx_delete)
 
 
 def main():

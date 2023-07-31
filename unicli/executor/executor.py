@@ -158,3 +158,19 @@ class Executor(object):
         :return: (success, error)
         """
         pass
+
+    def ctx_save(self, name: str) -> (any, str):
+        """
+        Save the last context
+        :param name: name
+        :return: (context, error)
+        """
+        pass
+
+    def ctx_restore(self, context: any) -> (bool, str):
+        """
+        Restore the context
+        :param context: ctx to restore
+        :return: (success, error)
+        """
+        pass

@@ -18,6 +18,7 @@ class Context:
     commands: dict[str, any] = field(default_factory=dict)
     usage: str = None
     executor: Optional[Executor] = None
+    saved_context: dict[str, any] = field(default_factory=dict)
     loader: dict[FileFormat, Loader] = field(default_factory=dict)
     loaded: list[LoadedInfo] = field(default_factory=list)
     arch: Optional[ArchSpec] = None

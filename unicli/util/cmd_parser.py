@@ -130,7 +130,8 @@ class Command(object):
         return arg, None
 
     def get_str_arg(self, name: str, index: int, def_val: Optional[str]) -> (str, str):
-        return self._get_arg(name, index, def_val)
+        arg, err = self._get_arg(name, index, def_val)
+        return arg, err if err != ERR_USE_DEF else None
 
     def get_file_arg(self, name: str, index: int, def_val: Optional[str]) -> (str, str):
         arg, err = self.get_str_arg(name, index, def_val)

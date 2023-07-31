@@ -40,7 +40,7 @@ class UnicornExecutor(Executor):
         executor = user_data  # type: UnicornExecutor
         ctx = executor.context  # type: Context
         rel_address = address - ctx.base_addr
-        address_s = ctx.arch.format_address(rel_address)
+        address_s = ctx.arch.format_address(rel_address, uppercase=True)
 
         if not executor.tracker.on_new_block(address, size):
             executor.emu_stop()
@@ -85,7 +85,7 @@ class UnicornExecutor(Executor):
 
         rel_address = address - self.context.base_addr
         for i in self.cs.disasm(code, rel_address, 0):
-            address_s = self.context.arch.format_address(i.address)
+            address_s = self.context.arch.format_address(i.address, uppercase=True)
             print("{}              {:<10s} {:<s}".format(address_s, i.mnemonic, i.op_str))
         return True, None
 
@@ -210,3 +210,17 @@ class UnicornExecutor(Executor):
     def step_address(self, address: int) -> (bool, str):
         self.tracker.set_stop_condition(StopCondition(StopConditionType.ON_ADDRESS, address))
         return self.emu_start(self.tracker.get_next_address(), 0, 0, 0)
+
+    def ctx_save(self, name: str) -> (any, str):
+        try:
+            ctx = self.mu.context_save()
+            return ctx, None
+        except UcError as e:
+            return None, e
+
+    def ctx_restore(self, context: any) -> (bool, str):
+        try:
+            self.mu.context_restore(context)
+            return True, None
+        except UcError as e:
+            return False, e
