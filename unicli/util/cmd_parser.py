@@ -104,10 +104,14 @@ ERR_USE_DEF = "ERR_UES_DEF"
 
 class Command(object):
 
-    def __init__(self, ctx: Context, cmd: Optional[str], args: list[str]):
+    def __init__(self, ctx: Context, raw: str, cmd: Optional[str], args: list[str]):
         self.ctx = ctx
+        self.raw = raw
         self.cmd = cmd
         self.args = args
+
+    def get_raw(self):
+        return self.raw
 
     def get_args(self):
         return self.args
@@ -121,22 +125,35 @@ class Command(object):
                 return def_val, ERR_USE_DEF
             return def_val, "missing <%s> arg" % name
         arg = self.args[index]
-        # replace with local var
-        if arg.startswith("$"):
+        return arg, None
+
+    def parse_var(self, arg: str, def_val: Optional[any]) -> (str, str):
+        if arg.startswith("$"):  # TODO:
             var_name = arg[1:]
             if var_name not in self.ctx.local_vars:
                 return def_val, "use undefined local var `%s`" % arg
             arg = self.ctx.local_vars[var_name]
         return arg, None
 
+    def get_raw_arg(self, name: str, index: int, def_val: Optional[str]) -> (str, str):
+        arg, err = self._get_arg(name, index, def_val)
+        if err is not None:
+            return def_val, err if err != ERR_USE_DEF else None
+        return arg, err
+
     def get_str_arg(self, name: str, index: int, def_val: Optional[str]) -> (str, str):
         arg, err = self._get_arg(name, index, def_val)
-        return arg, err if err != ERR_USE_DEF else None
+        if err is not None:
+            return def_val, err if err != ERR_USE_DEF else None
+        return self.parse_var(arg, def_val)
 
     def get_file_arg(self, name: str, index: int, def_val: Optional[str]) -> (str, str):
         arg, err = self.get_str_arg(name, index, def_val)
         if err is not None:
             return def_val, err if err != ERR_USE_DEF else None
+        arg, err = self.parse_var(arg, def_val)
+        if err is not None:
+            return def_val, err
         if not os.path.exists(arg):
             return def_val, "`%s` file is not exists!" % arg
         return os.path.abspath(arg), None
@@ -145,6 +162,9 @@ class Command(object):
         arg, err = self._get_arg(name, index, def_val)
         if err is not None:
             return def_val, err if err != ERR_USE_DEF else None
+        arg, err = self.parse_var(arg, def_val)
+        if err is not None:
+            return def_val, err
         addr = parse_address(arg, def_val)
         if addr == def_val:
             return def_val, "invalid address format: `%s` = `%s`" % (name, arg)
@@ -154,6 +174,9 @@ class Command(object):
         arg, err = self._get_arg(name, index, def_val)
         if err is not None:
             return def_val, err if err != ERR_USE_DEF else None
+        arg, err = self.parse_var(arg, def_val)
+        if err is not None:
+            return def_val, err
         addr = parse_number(arg, def_val)
         if addr == def_val:
             return def_val, "invalid number format: `%s` = `%s`" % (name, arg)
@@ -163,6 +186,9 @@ class Command(object):
         arg, err = self._get_arg(name, index, def_val)
         if err is not None:
             return def_val, err if err != ERR_USE_DEF else None
+        arg, err = self.parse_var(arg, def_val)
+        if err is not None:
+            return def_val, err
         data = parse_bytes(arg)
         if len(data) == 0:
             return def_val, "invalid data format: `%s` = `%s`" % (name, arg)
@@ -173,7 +199,7 @@ class Command(object):
             return def_val, "missing <%s> arg" % name
         cmd = self.args[index]
         args = self.args[index+1:]
-        return Command(self.ctx, cmd, args)
+        return Command(self.ctx, "", cmd, args)
 
     def get_str_flag(self, names: list[str], start_index: int, def_val: Optional[str]) -> Optional[str]:
         i = start_index
@@ -189,6 +215,12 @@ class Command(object):
                     if i < len(self.args):
                         return self.args[i]
             i += 1
+        return def_val
+
+    def get_addr_flag(self, names: list[str], start_index: int, def_val: int) -> Optional[int]:
+        val = self.get_str_flag(names, start_index, None)
+        if val is not None:
+            return parse_address(val, def_val)
         return def_val
 
     def get_int_flag(self, names: list[str], start_index: int, def_val: int) -> int:
@@ -213,9 +245,11 @@ class Command(object):
 
 
 def parse_command(ctx: Context, line: str) -> Optional[Command]:
+    if line.startswith("!"):
+        line = "! " + line[1:]
     parts = tokenize(line, [' '], ['"', "'", '[', ']'], ['#'])
     if len(parts) > 0:
-        c = Command(ctx, None, [])
+        c = Command(ctx, line, None, [])
         c.cmd = parts[0]
         c.args += parts[1:]
         return c

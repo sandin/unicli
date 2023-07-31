@@ -24,7 +24,7 @@ def cmd_script(ctx: Context, cmd: Command) -> (int, str):
     return CMD_RESULT_OK, None
 
 
-def cmd_set(ctx: Context, cmd: Command) -> (int, str):
+def cmd_set_var(ctx: Context, cmd: Command) -> (int, str):
     name, err = cmd.get_str_arg("name", 0, None)
     if err is not None:
         return CMD_RESULT_FAILED, err
@@ -38,7 +38,7 @@ def cmd_set(ctx: Context, cmd: Command) -> (int, str):
     return CMD_RESULT_OK, None
 
 
-def cmd_unset(ctx: Context, cmd: Command) -> (int, str):
+def cmd_unset_var(ctx: Context, cmd: Command) -> (int, str):
     name, err = cmd.get_str_arg("name", 0, None)
     if err is not None:
         return CMD_RESULT_FAILED, err
@@ -51,6 +51,21 @@ def cmd_unset(ctx: Context, cmd: Command) -> (int, str):
     print("unset %s(%s)" % (name, value))
     return CMD_RESULT_OK, None
 
+
+def cmd_print_var(ctx: Context, cmd: Command) -> (int, str):
+    name, err = cmd.get_raw_arg("name", 0, None)
+    if err is not None:
+        return CMD_RESULT_FAILED, err
+
+    if name.startswith("$"):
+        name = name[1:]
+
+    if name not in ctx.local_vars:
+        return CMD_RESULT_FAILED, "%s is undefined" % name
+
+    value = ctx.local_vars[name]
+    print("$%s = %s" % (name, value))
+    return CMD_RESULT_OK, None
 
 def cmd_set_base(ctx: Context, cmd: Command) -> (int, str):
     address, err = cmd.get_addr_arg("addr", 0, -1)
@@ -74,8 +89,21 @@ def cmd_disasm(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         return CMD_RESULT_FAILED, err
 
-    ret, err = ctx.executor.disasm(ctx.base_addr + address, size)
+    # --base <addr>
+    base_addr = cmd.get_addr_flag(["b", "base"], 2, ctx.base_addr)
+
+    ret, err = ctx.executor.disasm(base_addr + address, size)
     if err is not None:
         err = "can not disassemble code at 0x%x - 0x%x, %s" % (address, address + size, err)
         return CMD_RESULT_FAILED, err
+    return CMD_RESULT_OK, None
+
+
+def cmd_run_expr(ctx: Context, cmd: Command) -> (int, str):
+    expr = cmd.get_raw()[len(cmd.cmd):]
+    if not expr:
+        return CMD_RESULT_FAILED, "missing <expr> arg"
+
+    ret = eval(expr)
+    print(ret)
     return CMD_RESULT_OK, None

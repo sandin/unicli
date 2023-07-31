@@ -25,21 +25,20 @@ hook_code 0x18D388 reg_read x8 x9 x10
 hook_code 0x18D398 reg_read w11 w12  # eor        w11, w11, w12
 hook_code 0x18D39C reg_read w11
 
-# start emulation, 1st string
+# start emulation, 1st string in .data
 ctx_save func_init_state
 mem_read 0x06e70dc 0xf+1 # read memory before the emulation
 emu_start 0x18D2C0 0x18D378
 mem_read 0x06e70dc 0xf+1 # read memory after the emulation
 
-# start emulation, 2th string
+# start emulation, 2th string in .data
 ctx_restore func_init_state
-mem_read 0x6E70EC 0x20+1
+mem_read 0x6E70EC 0x24+1
 emu_start 0x18D2C0 0x18D3A4
-mem_read 0x6E70EC 0x20+1
+mem_read 0x6E70EC 0x24+1
 
-# start emulation, 3rd string
+# start emulation, 3rd string in .data
 ctx_restore func_init_state
 mem_read 0x6e7114 0x25+1
 emu_start 0x18D2C0 0x18D3E0
 mem_read 0x6e7114 0x25+1
-

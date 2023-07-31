@@ -12,7 +12,10 @@ def cmd_hook_block(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         return CMD_RESULT_FAILED, err
 
-    ctx.executor.add_block_hook(address, subcommand)
+    # --base <addr>
+    base_addr = cmd.get_addr_flag(["b", "base"], 2, ctx.base_addr)
+
+    ctx.executor.add_block_hook(base_addr + address, subcommand)
     if err is not None:
         return CMD_RESULT_FAILED, err
     address_s = ctx.arch.format_address(address)
@@ -29,7 +32,10 @@ def cmd_hook_code(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         return CMD_RESULT_FAILED, err
 
-    ctx.executor.add_code_hook(address, subcommand)
+    # --base <addr>
+    base_addr = cmd.get_addr_flag(["b", "base"], 2, ctx.base_addr)
+
+    ctx.executor.add_code_hook(base_addr + address, subcommand)
     if err is not None:
         return CMD_RESULT_FAILED, err
     address_s = ctx.arch.format_address(address)

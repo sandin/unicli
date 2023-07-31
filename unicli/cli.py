@@ -7,7 +7,8 @@ from .command import CMD_RESULT_EXIT, CMD_RESULT_FAILED
 from .command.cmd_ctx import cmd_ctx_save, cmd_ctx_restore, cmd_ctx_delete
 from .command.cmd_hook import cmd_hook_block, cmd_hook_code
 from .command.cmd_emu import cmd_emu_start, cmd_emu_stop
-from .command.cmd_common import cmd_exit, cmd_help, cmd_script, cmd_set, cmd_unset, cmd_set_base, cmd_disasm
+from .command.cmd_common import cmd_exit, cmd_help, cmd_script, cmd_set_var, cmd_unset_var, cmd_print_var, cmd_set_base, \
+    cmd_disasm, cmd_run_expr
 from .command.cmd_load import cmd_load, cmd_unload, cmd_load_list
 from .command.cmd_mem import cmd_mem_list, cmd_mem_read, cmd_mem_map, cmd_mem_write
 from .command.cmd_reg import cmd_reg_write, cmd_reg_read
@@ -21,8 +22,11 @@ USAGE = """Usage: <command> <args..> <flags..>
      f script <filename>                        Load a script file
      s set <name> <value>                       Set a local variable
      u unset <name>                             Unset a local variable
-     b set_base <abs_addr>                      Set base address for all relative addresses
-     d disasm <rel_addr>                        Disassemble code at address
+     p print <name>                             Print a local variable
+     b set_base <addr>                          Set base address for all relative addresses
+     d disasm <addr>                            Disassemble code at address
+            [--base <address>]                  Base address of <addr>
+     ! run <expr>                               Execute any python expression
      h help                                     Print help information
      e exit                                     Exit the program   
      
@@ -37,9 +41,11 @@ USAGE = """Usage: <command> <args..> <flags..>
      
  memory:
     mm mem_map <abs_addr> <size> [<port>]       Map a piece of virtual memory
-    mw mem_write <rel_addr> <data>              Write data to memory at address
-    mr mem_read <rel_addr> <size>               Read the memory at address
+    mw mem_write <addr> <data>                  Write data to memory at address
+                [--base <address>]              Base address of <addr>
+    mr mem_read <addr> <size>                   Read the memory at address
                 [--out <output_file>]           Dump memory to a file
+                [--base <address>]              Base address of <addr>
     ml mem_list                                 List all mapped memory range
 
  register:
@@ -47,12 +53,15 @@ USAGE = """Usage: <command> <args..> <flags..>
     rr reg_read <reg_name>                      Read a register
 
  hook:
-    hb hook_block <rel_addr> <subcommand>       Hook block at address
-    hc hook_code <rel_addr> <subcommand>        Hook code at address
+    hb hook_block <addr> <subcommand>           Hook block at address
+                  [--base <address>]            Base address of <addr>
+    hc hook_code <addr> <subcommand>            Hook code at address
+                  [--base <address>]            Base address of <addr>
 
  emu:
     es emu_start <start_addr> <end_addr>        Start emulation
                  [<timeout> <count>]
+                 [--base <address>]             Base address of <start_addr> and <end_addr>
     et emu_stop                                 Stop emulation        
     
  context:
@@ -70,10 +79,12 @@ CMDS = {}
 register_cmd(CMDS, "exit", ".exit", "exit()", "e", handler=cmd_exit)
 register_cmd(CMDS, "help", "h", handler=cmd_help)
 register_cmd(CMDS, "script", "f", handler=cmd_script)
-register_cmd(CMDS, "set", "s", handler=cmd_set)
-register_cmd(CMDS, "unset", "u", handler=cmd_unset)
+register_cmd(CMDS, "set", "s", handler=cmd_set_var)
+register_cmd(CMDS, "unset", "u", handler=cmd_unset_var)
+register_cmd(CMDS, "print", "e", handler=cmd_print_var)
 register_cmd(CMDS, "set_base", "b", handler=cmd_set_base)
 register_cmd(CMDS, "disasm", "d", handler=cmd_disasm)
+register_cmd(CMDS, "run", "!", handler=cmd_run_expr)
 register_cmd(CMDS, "load", "lf", handler=cmd_load)
 register_cmd(CMDS, "unload", "lu", handler=cmd_unload)
 register_cmd(CMDS, "load_list", "ll", handler=cmd_load_list)

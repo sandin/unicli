@@ -43,14 +43,17 @@ def cmd_mem_read(ctx: Context, cmd: Command) -> (int, str):
         return CMD_RESULT_FAILED, err
 
     # <size>
-    size, err = cmd.get_int_arg("size", 1, -1)
+    size, err = cmd.get_int_arg("size", 1, 0)
     if err is not None:
         return CMD_RESULT_FAILED, err
 
     # --out <out>
     out = cmd.get_str_flag(["o", "out"], 2, None)
 
-    data, err = ctx.executor.mem_read(ctx.base_addr + address, size)
+    # --base <addr>
+    base_addr = cmd.get_addr_flag(["b", "base"], 2, ctx.base_addr)
+
+    data, err = ctx.executor.mem_read(base_addr + address, size)
     start_addr_s = ctx.arch.format_address(address)
     end_addr_s = ctx.arch.format_address(address + size)
     if err is not None:
@@ -78,9 +81,13 @@ def cmd_mem_write(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         return CMD_RESULT_FAILED, err
 
-    ret, err = ctx.executor.mem_write(ctx.base_addr + address, data)
+    # --base <addr>
+    base_addr = cmd.get_addr_flag(["b", "base"], 2, ctx.base_addr)
+
+    ret, err = ctx.executor.mem_write(base_addr + address, data)
     if err is not None:
-        err = "can not write memory at 0x%x - 0x%x, %s" % (address, address + len(data), err)
+        err = "can not write memory at 0x%x - 0x%x, %s" % \
+              (base_addr + address, base_addr + address + len(data), err)
         return CMD_RESULT_FAILED, err
     hexdump(data, off=address)
     return CMD_RESULT_OK, None

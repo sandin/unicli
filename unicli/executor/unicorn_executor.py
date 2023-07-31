@@ -39,7 +39,7 @@ class UnicornExecutor(Executor):
     def hook_block(mu: unicorn.Uc, address: int, size: int, user_data: any):
         executor = user_data  # type: UnicornExecutor
         ctx = executor.context  # type: Context
-        rel_address = address - ctx.base_addr
+        rel_address = address - ctx.base_addr  # TODO: the base address of the current module
         address_s = ctx.arch.format_address(rel_address, uppercase=True)
 
         if not executor.tracker.on_new_block(address, size):
@@ -50,8 +50,8 @@ class UnicornExecutor(Executor):
         print("%s %s:" % (address_s, block_name))
 
         # user's hooks
-        if rel_address in executor.block_hooks:
-            for subcommand in executor.block_hooks[rel_address]:
+        if address in executor.block_hooks:
+            for subcommand in executor.block_hooks[address]:
                 execute_command(ctx, subcommand)
 
     @staticmethod
@@ -66,9 +66,8 @@ class UnicornExecutor(Executor):
         # user's hooks
         # the callback of uc_hook is called before the instruction is executed
         # so if you want to post-instruction hook, just hook the next address
-        rel_address = address - ctx.base_addr
-        if rel_address in executor.code_hooks:
-            subcommand = executor.code_hooks[rel_address]
+        if address in executor.code_hooks:
+            subcommand = executor.code_hooks[address]
             execute_command(ctx, subcommand)
 
         # disassemble code

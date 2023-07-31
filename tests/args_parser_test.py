@@ -64,12 +64,13 @@ def test_parse_args():
 def test_get_flags():
     ctx = Context()
 
-    command = parse_command(ctx, 'mem_read 0x38550 0x38550+0x1000 --out "/you/path/output.bin" -f')
+    command = parse_command(ctx, 'mem_read 0x38550 0x38550+0x1000 --out "/you/path/output.bin" -f -b 0x20000+0x100')
     assert command.cmd == "mem_read"
-    assert len(command.args) == 5
-    assert command.get_addr_arg("start_addr", 0, 0) == 0x38550
-    assert command.get_addr_arg("end_addr", 1, 0) == (0x38550+0x1000)
+    assert len(command.args) == 7
+    assert command.get_addr_arg("start_addr", 0, 0)[0] == 0x38550
+    assert command.get_addr_arg("end_addr", 1, 0)[0] == (0x38550+0x1000)
     assert command.get_str_flag(["o", "out"], 2, "") == "/you/path/output.bin"
+    assert command.get_addr_flag(["b", "base"], 2, 0) == 0x20000+0x100
     assert command.has_flag(["f", "force"], 2, False) is True
 
 
@@ -89,6 +90,8 @@ def test_parse_address():
     assert parse_address("0x00010000 + 0x101") == 0x00010101
     assert parse_address(" 0x00010000 + 0x101 ") == 0x00010101
     assert parse_address(" 0x00010001 - 0x10000 ") == 0x00000001
+
+    assert parse_address("0x00010000+0x101") == 0x00010101
 
     # invalid format
     assert parse_address("", -1) == -1
