@@ -142,3 +142,10 @@ class ArchSpecArm64(ArchSpec):
     def get_instruction_pointer_reg_num(self) -> int:
         return UC_ARM64_REG_PC
 
+    def get_frame_pointer_reg_num(self) -> int:
+        return UC_ARM64_REG_FP
+
+    def get_stack_pointer_reg_num(self) -> int:
+        return UC_ARM64_REG_SP
+
+

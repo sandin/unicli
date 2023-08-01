@@ -8,9 +8,15 @@ def register_cmd(commands, *cmds, handler):
 
 def parse_init_script(filename: str) -> list[str]:
     cmds = []
+    multi_line_comment_flag = '"""'
+    in_multi_line_comment = False
     with open(filename, "r") as f:
         for line in f:
-            cmds.append(line.strip())
+            if line.startswith(multi_line_comment_flag):
+                in_multi_line_comment = not in_multi_line_comment
+                continue
+            if not in_multi_line_comment:
+                cmds.append(line.strip())
     return cmds
 
 

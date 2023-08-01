@@ -8,7 +8,7 @@ from .command.cmd_ctx import cmd_ctx_save, cmd_ctx_restore, cmd_ctx_delete
 from .command.cmd_hook import cmd_hook_block, cmd_hook_code
 from .command.cmd_emu import cmd_emu_start, cmd_emu_stop
 from .command.cmd_common import cmd_exit, cmd_help, cmd_script, cmd_set_var, cmd_unset_var, cmd_print_var, cmd_set_base, \
-    cmd_disasm, cmd_run_expr
+    cmd_disasm, cmd_run_expr, cmd_run_file
 from .command.cmd_load import cmd_load, cmd_unload, cmd_load_list
 from .command.cmd_mem import cmd_mem_list, cmd_mem_read, cmd_mem_map, cmd_mem_write
 from .command.cmd_reg import cmd_reg_write, cmd_reg_read
@@ -26,7 +26,8 @@ USAGE = """Usage: <command> <args..> <flags..>
      b set_base <addr>                          Set base address for all relative addresses
      d disasm <addr>                            Disassemble code at address
             [--base <address>]                  Base address of <addr>
-     ! run <expr>                               Execute any python expression
+     ! eval <expr>                              Execute any python expression
+     x exec <filename>                          Execute any python script
      h help                                     Print help information
      e exit                                     Exit the program   
      
@@ -84,7 +85,8 @@ register_cmd(CMDS, "unset", "u", handler=cmd_unset_var)
 register_cmd(CMDS, "print", "e", handler=cmd_print_var)
 register_cmd(CMDS, "set_base", "b", handler=cmd_set_base)
 register_cmd(CMDS, "disasm", "d", handler=cmd_disasm)
-register_cmd(CMDS, "run", "!", handler=cmd_run_expr)
+register_cmd(CMDS, "eval", "!", handler=cmd_run_expr)
+register_cmd(CMDS, "exec", "x", handler=cmd_run_file)
 register_cmd(CMDS, "load", "lf", handler=cmd_load)
 register_cmd(CMDS, "unload", "lu", handler=cmd_unload)
 register_cmd(CMDS, "load_list", "ll", handler=cmd_load_list)

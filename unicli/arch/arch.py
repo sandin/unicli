@@ -64,7 +64,21 @@ class ArchSpec(object):
 
     def get_instruction_pointer_reg_num(self) -> int:
         """
-        Get Register name of instrument pointer(IP, PC)
+        Get Register name of instrument pointer(IP/PC)
+        :return: register number(id)
+        """
+        pass
+
+    def get_frame_pointer_reg_num(self) -> int:
+        """
+        Get Register name of frame pointer(EBP/FP)
+        :return: register number(id)
+        """
+        pass
+
+    def get_stack_pointer_reg_num(self) -> int:
+        """
+        Get Register name of stack pointer(ESP/SP)
         :return: register number(id)
         """
         pass

@@ -1,3 +1,5 @@
+from typing import Callable
+
 from .executor import Executor, MemoryPerm
 from unicorn import *
 from capstone import *
@@ -21,6 +23,7 @@ class UnicornExecutor(Executor):
         self.tracker = Tracker()
         self.block_hooks = {}
         self.code_hooks = {}
+        self.all_code_hooks = []
         self._setup_hooks()
         self._exit_enabled = False
 
@@ -51,12 +54,15 @@ class UnicornExecutor(Executor):
 
         # user's hooks
         if address in executor.block_hooks:
-            for subcommand in executor.block_hooks[address]:
-                execute_command(ctx, subcommand)
+            hook = executor.block_hooks[address]
+            if type(hook) == Command:
+                execute_command(ctx, hook)
+            elif type(hook) == Callable:
+                hook(ctx, address, size, user_data)
 
     @staticmethod
     def hook_code(mu: unicorn.Uc, address: int, size: int, user_data: any):
-        executor = user_data # type: UnicornExecutor
+        executor = user_data  # type: UnicornExecutor
         ctx = executor.context  # type: Context
 
         if not executor.tracker.on_new_inst(address, size):
@@ -66,9 +72,14 @@ class UnicornExecutor(Executor):
         # user's hooks
         # the callback of uc_hook is called before the instruction is executed
         # so if you want to post-instruction hook, just hook the next address
+        for hook in executor.all_code_hooks:
+            hook(mu, address, size, user_data)
         if address in executor.code_hooks:
-            subcommand = executor.code_hooks[address]
-            execute_command(ctx, subcommand)
+            hook = executor.code_hooks[address]
+            if type(hook) == Command:
+                execute_command(ctx, hook)
+            elif type(hook) == Callable:
+                hook(ctx, address, size, user_data)
 
         # disassemble code
         executor.disasm(address, size)
@@ -189,7 +200,10 @@ class UnicornExecutor(Executor):
         return True, None
 
     def add_code_hook(self, address: int, subcommand: Command) -> (bool, str):
-        self.code_hooks[address] = subcommand
+        if address == 0:  # hack
+            self.all_code_hooks.append(subcommand)
+        else:
+            self.code_hooks[address] = subcommand
         return True, None
 
     def del_code_hook(self, address: int) -> (bool, str):

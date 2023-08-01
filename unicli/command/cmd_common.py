@@ -107,3 +107,19 @@ def cmd_run_expr(ctx: Context, cmd: Command) -> (int, str):
     ret = eval(expr)
     print(ret)
     return CMD_RESULT_OK, None
+
+
+def cmd_run_file(ctx: Context, cmd: Command) -> (int, str):
+    filename, err = cmd.get_file_arg("filename", 0, None)
+    if err is not None:
+        return CMD_RESULT_FAILED, err
+
+    with open(filename, 'rb') as f:
+        g = globals()
+        g.update({
+            "__file__": filename,
+            "__name__": "__main__",
+            "ctx": ctx
+        })
+        exec(compile(f.read(), filename, 'exec'), g, g)
+    return CMD_RESULT_OK, None
