@@ -79,6 +79,7 @@ def cmd_load(ctx: Context, cmd: Command) -> (int, str):
     ctx.loaded.append(loaded_info)
     _set_current_loaded_info(ctx, loaded_info)
     print("Successfully loaded module: %s" % filename)
+    ctx.last_result = loaded_info
     return CMD_RESULT_OK, None
 
 
@@ -104,6 +105,7 @@ def cmd_unload(ctx: Context, cmd: Command) -> (int, str):
     loaded_info = ctx.loaded[0] if len(ctx.loaded) > 0 else None
     _set_current_loaded_info(ctx, loaded_info)
     print("Successfully unloaded module: %s" % filename)
+    ctx.last_result = True
     return CMD_RESULT_OK, None
 
 
@@ -115,4 +117,5 @@ def cmd_load_list(ctx: Context, cmd: Command) -> (int, str):
             print("%s - %s %s" % (start_addr_s, end_addr_s, item.filename))
     else:
         print("Nothing loaded yet")
+    ctx.last_result = list(ctx.loaded)  # clone
     return CMD_RESULT_OK, None

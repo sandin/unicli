@@ -8,8 +8,8 @@ mem_list
 
 # initialize stack & registers
 mem_map 0x00010000 8*1024*1024
-set sp 0x00010000+(8*1024*1024)-0x100
-reg_write all 0 sp $sp
+set stack_pointer 0x00010000+(8*1024*1024)-0x100
+reg_write all 0 sp $stack_pointer
 
 # hook for 1st string
 hook_code 0x18d2cc reg_read x10

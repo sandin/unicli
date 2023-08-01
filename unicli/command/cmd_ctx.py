@@ -15,6 +15,7 @@ def cmd_ctx_save(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         return CMD_RESULT_FAILED, "can not save the last context, %s" % err
     ctx.saved_context[name] = context
+    ctx.last_result = context
     return CMD_RESULT_OK, None
 
 
@@ -33,6 +34,7 @@ def cmd_ctx_restore(ctx: Context, cmd: Command) -> (int, str):
     ret, err = ctx.executor.ctx_restore(context)
     if err is not None:
         return CMD_RESULT_FAILED, "can not save the last context, %s" % err
+    ctx.last_result = ret
     return CMD_RESULT_OK, None
 
 
@@ -48,4 +50,5 @@ def cmd_ctx_delete(ctx: Context, cmd: Command) -> (int, str):
         return CMD_RESULT_FAILED, "can not find the context by name %s" % name
 
     del ctx.saved_context[name]
+    ctx.last_result = True
     return CMD_RESULT_OK, None

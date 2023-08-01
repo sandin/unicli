@@ -27,6 +27,7 @@ class Context:
     state: State = State.INVALID
     prompt: str = ">>>"
     local_vars: dict[str, str] = field(default_factory=dict)
+    last_result: any = None
 
 
 def execute_command(ctx: Context, command) -> (int, str):

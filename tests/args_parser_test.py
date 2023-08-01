@@ -1,7 +1,7 @@
 import pytest
 
 from unicli.context import Context
-from unicli.util.cmd_parser import parse_command, parse_address, parse_bytes
+from unicli.util.cmd_parser import parse_command, parse_address, parse_bytes, parse_var
 
 
 def test_parse_args():
@@ -72,6 +72,29 @@ def test_get_flags():
     assert command.get_str_flag(["o", "out"], 2, "") == "/you/path/output.bin"
     assert command.get_addr_flag(["b", "base"], 2, 0) == 0x20000+0x100
     assert command.has_flag(["f", "force"], 2, False) is True
+
+
+def test_parse_var():
+    assert parse_var({"sp": "0x0001000"}, "$sp", 0)[0] == "0x0001000"
+    assert parse_var({"sp": "0x0001000"}, "$sp+0x10", 0)[0] == "0x0001000+0x10"
+    assert parse_var({"sp": "0x0001000"}, "$sp + 0x10", 0)[0] == "0x0001000 + 0x10"
+    assert parse_var({"sp": "0x0001000"}, "0x10+$sp", 0)[0] == "0x10+0x0001000"
+    assert parse_var({"sp": "0x0001000"}, "$sp+$sp", 0)[0] == "0x0001000+0x0001000"
+    assert parse_var({"sp": "0x0001000"}, "$sp + $sp", 0)[0] == "0x0001000 + 0x0001000"
+    assert parse_var({"sp": "0x0001000"}, " $sp + $sp", 0)[0] == " 0x0001000 + 0x0001000"
+    assert parse_var({"sp": "0x0001000"}, "$sp-$sp", 0)[0] == "0x0001000-0x0001000"
+    assert parse_var({"sp": "0x0001000"}, "$sp*$sp", 0)[0] == "0x0001000*0x0001000"
+    assert parse_var({"sp": "0x0001000"}, "$sp/$sp", 0)[0] == "0x0001000/0x0001000"
+    assert parse_var({"sp": "0x0001000"}, "$sp+$sp+0x10", 0)[0] == "0x0001000+0x0001000+0x10"
+    assert parse_var({"sp": "0x0001000"}, "0x10+$sp+$sp+0x10", 0)[0] == "0x10+0x0001000+0x0001000+0x10"
+    assert parse_var({"sp": "0x0001000"}, "-$sp", 0)[0] == "-0x0001000"
+
+    def var_solver(var_name, def_val):
+        if var_name == "sp":
+            return "0x0001000"
+        return def_val
+    assert parse_var(var_solver, "-$sp", 0)[0] == "-0x0001000"
+
 
 
 def test_parse_address():

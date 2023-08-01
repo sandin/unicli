@@ -34,6 +34,7 @@ def cmd_reg_read(ctx: Context, cmd: Command) -> (int, str):
         i += 1
 
     i = 0
+    result = {}
     for reg_num in regs_batch:
         value, err = ctx.executor.reg_read(reg_num)
         reg_name = ctx.arch.get_reg_name(reg_num, "")
@@ -42,7 +43,9 @@ def cmd_reg_read(ctx: Context, cmd: Command) -> (int, str):
             return CMD_RESULT_FAILED, err
         new_line = (i != 0 and (i + 1) % 2 == 0) or i == len(regs_batch) - 1
         print("%3s => %s    " % (reg_name, ctx.arch.format_number(value)), end="\n" if new_line else "")
+        result[reg_name] = value
         i += 1
+    ctx.last_result = result
     return CMD_RESULT_OK, None
 
 
@@ -78,6 +81,7 @@ def cmd_reg_write(ctx: Context, cmd: Command) -> (int, str):
         i += 1
 
     i = 0
+    result = {}
     for reg_num, value in regs_batch:
         ret, err = ctx.executor.reg_write(reg_num, value)
         reg_name = ctx.arch.get_reg_name(reg_num, "")
@@ -86,5 +90,7 @@ def cmd_reg_write(ctx: Context, cmd: Command) -> (int, str):
             return CMD_RESULT_FAILED, err
         new_line = (i != 0 and (i + 1) % 2 == 0) or i == len(regs_batch) - 1
         print("%3s => %s    " % (reg_name, ctx.arch.format_number(value)), end="\n" if new_line else "")
+        result[reg_name] = value
         i += 1
+    ctx.last_result = result
     return CMD_RESULT_OK, None

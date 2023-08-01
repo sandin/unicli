@@ -46,6 +46,7 @@ USAGE = """Usage: <command> <args..> <flags..>
                 [--base <address>]              Base address of <addr>
     mr mem_read <addr> <size>                   Read the memory at address
                 [--out <output_file>]           Dump memory to a file
+                [--format <format>]             Print format: hex, c_string, utf8_string, utf16_string
                 [--base <address>]              Base address of <addr>
     ml mem_list                                 List all mapped memory range
 

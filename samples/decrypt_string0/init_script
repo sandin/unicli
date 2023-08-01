@@ -10,7 +10,7 @@ mem_list
 
 # initialize stack & registers
 mem_map 0x00010000 8*1024*1024
-set sp 0x00010000+(8*1024*1024)-0x100
+set stack_pointer 0x00010000+(8*1024*1024)-0x100
 
 # patch code
 set ret "C0 03 5F D6"
@@ -32,7 +32,7 @@ hook_code 0x38844 reg_read Q0
 hook_code 0x3887c mem_read 0xFB298 0x29
 
 # start emulation
-reg_write all 0 sp $sp
+reg_write all 0 sp $stack_pointer
 emu_start 0x385AC 0x038814-4
 mem_read 0xFB298 0x28
 mem_read 0xFB780 0x40

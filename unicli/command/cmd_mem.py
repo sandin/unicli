@@ -30,6 +30,7 @@ def cmd_mem_list(ctx: Context, cmd: Command) -> (int, str):
         start_addr_s = ctx.arch.format_address(start)
         end_addr_s = ctx.arch.format_address(end + 1)
         print("%s - %s %s" % (start_addr_s, end_addr_s, perm_to_str(prot)))
+    ctx.last_result = list(regions)  # clone
     return CMD_RESULT_OK, None
 
 
@@ -43,7 +44,7 @@ def cmd_mem_read(ctx: Context, cmd: Command) -> (int, str):
         return CMD_RESULT_FAILED, err
 
     # <size>
-    size, err = cmd.get_int_arg("size", 1, 0)
+    size, err = cmd.get_int_arg("size", 1, 0x4)
     if err is not None:
         return CMD_RESULT_FAILED, err
 
@@ -53,17 +54,34 @@ def cmd_mem_read(ctx: Context, cmd: Command) -> (int, str):
     # --base <addr>
     base_addr = cmd.get_addr_flag(["b", "base"], 2, ctx.base_addr)
 
+    # --format <format>
+    out_format = cmd.get_str_flag(["f", "format"], 2, "hex")
+
     data, err = ctx.executor.mem_read(base_addr + address, size)
     start_addr_s = ctx.arch.format_address(address)
     end_addr_s = ctx.arch.format_address(address + size)
     if err is not None:
         err = "can not read memory at %s - %s, %s" % (start_addr_s, end_addr_s, err)
         return CMD_RESULT_FAILED, err
+
     if out is not None:
         write_content_to_file(data, out)
+        ret = out
         print("%s - %s %d bytes have been saved to the file: %s" % (start_addr_s, end_addr_s, len(data), out))
     else:
-        hexdump(data, off=address)
+        if out_format == "c_string":
+            ret = data.decode()
+            print('%s "%s"' % (start_addr_s, ret))
+        elif out_format == "utf8_string":
+            ret = data.decode("utf-8")
+            print('%s "%s"' % (start_addr_s, ret))
+        elif out_format == "utf16_string":
+            ret = data.decode("utf-16")
+            print('%s "%s"' % (start_addr_s, ret))
+        else:  # format == "hex"
+            ret = data
+            hexdump(data, off=address)
+    ctx.last_result = ret
     return CMD_RESULT_OK, None
 
 
@@ -90,6 +108,7 @@ def cmd_mem_write(ctx: Context, cmd: Command) -> (int, str):
               (base_addr + address, base_addr + address + len(data), err)
         return CMD_RESULT_FAILED, err
     hexdump(data, off=address)
+    ctx.last_result = data
     return CMD_RESULT_OK, None
 
 
@@ -122,4 +141,5 @@ def cmd_mem_map(ctx: Context, cmd: Command) -> (int, str):
         err = "can not map memory at %s - %s %s, %s" % (start_addr_s, end_addr_s, perm_to_str(prot), err)
         return CMD_RESULT_FAILED, err
     print("%s - %s %s" % (start_addr_s, end_addr_s, perm_to_str(prot)))
+    ctx.last_result = addr
     return CMD_RESULT_OK, None

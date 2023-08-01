@@ -65,6 +65,7 @@ def cmd_print_var(ctx: Context, cmd: Command) -> (int, str):
 
     value = ctx.local_vars[name]
     print("$%s = %s" % (name, value))
+    ctx.last_result = value
     return CMD_RESULT_OK, None
 
 def cmd_set_base(ctx: Context, cmd: Command) -> (int, str):
@@ -74,6 +75,7 @@ def cmd_set_base(ctx: Context, cmd: Command) -> (int, str):
 
     ctx.base_addr = address
     print("Set base address 0x%x" % (address))
+    ctx.last_result = ctx.base_addr
     return CMD_RESULT_OK, None
 
 
@@ -96,6 +98,7 @@ def cmd_disasm(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         err = "can not disassemble code at 0x%x - 0x%x, %s" % (address, address + size, err)
         return CMD_RESULT_FAILED, err
+    ctx.last_result = ret
     return CMD_RESULT_OK, None
 
 
@@ -104,9 +107,13 @@ def cmd_run_expr(ctx: Context, cmd: Command) -> (int, str):
     if not expr:
         return CMD_RESULT_FAILED, "missing <expr> arg"
 
-    ret = eval(expr)
-    print(ret)
-    return CMD_RESULT_OK, None
+    try:
+        ret = eval(expr)
+        print(ret)
+        ctx.last_result = ret
+        return CMD_RESULT_OK, None
+    except:
+        return CMD_RESULT_FAILED, "can't eval expr: %s" % expr
 
 
 def cmd_run_file(ctx: Context, cmd: Command) -> (int, str):

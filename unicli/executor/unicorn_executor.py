@@ -1,4 +1,4 @@
-from typing import Callable
+from inspect import isfunction
 
 from .executor import Executor, MemoryPerm
 from unicorn import *
@@ -57,7 +57,7 @@ class UnicornExecutor(Executor):
             hook = executor.block_hooks[address]
             if type(hook) == Command:
                 execute_command(ctx, hook)
-            elif type(hook) == Callable:
+            elif isfunction(hook):
                 hook(ctx, address, size, user_data)
 
     @staticmethod
@@ -78,7 +78,7 @@ class UnicornExecutor(Executor):
             hook = executor.code_hooks[address]
             if type(hook) == Command:
                 execute_command(ctx, hook)
-            elif type(hook) == Callable:
+            elif isfunction(hook):
                 hook(ctx, address, size, user_data)
 
         # disassemble code
@@ -115,7 +115,7 @@ class UnicornExecutor(Executor):
         except UcError as e:
             return False, e
 
-    def mem_read(self, address: int, size: int) -> (bool, str):
+    def mem_read(self, address: int, size: int) -> (bytearray, str):
         try:
             data = self.mu.mem_read(address, size)
             return data, None

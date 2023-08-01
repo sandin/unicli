@@ -14,15 +14,13 @@ def hook_code(mu: unicorn.Uc, address: int, size: int, user_data: any):
         val, err = executor.reg_read(reg_num)
         if err is not None:
             continue
-        if reg_num in g_last_reg_values:
-            if reg_num == ctx.arch.get_instruction_pointer_reg_num() \
-                    or reg_num == ctx.arch.get_frame_pointer_reg_num():
-                continue
-            old_val = g_last_reg_values[reg_num]
-            if val != old_val:
-                reg_name = ctx.arch.get_reg_name(reg_num, "")
-                prefix = "                                                       ; "
-                print("%s%3s: %s => %s    " % (prefix, reg_name, ctx.arch.format_number(old_val), ctx.arch.format_number(val)))
+        if reg_num == ctx.arch.get_instruction_pointer_reg_num():
+            continue
+        old_val = g_last_reg_values[reg_num] if reg_num in g_last_reg_values else 0
+        if val != old_val:
+            reg_name = ctx.arch.get_reg_name(reg_num, "")
+            prefix = "                                                       ; "
+            print("%s%3s: %s => %s    " % (prefix, reg_name, ctx.arch.format_number(old_val), ctx.arch.format_number(val)))
         g_last_reg_values[reg_num] = val
 
 

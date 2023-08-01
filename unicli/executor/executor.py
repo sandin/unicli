@@ -33,12 +33,12 @@ class Executor(object):
         """
         pass
 
-    def mem_read(self, address: int, size: int) -> (bool, str):
+    def mem_read(self, address: int, size: int) -> (bytearray, str):
         """
         Read memory at address
         :param address: to read
         :param size: size
-        :return: (success, error)
+        :return: (bytearray, error)
         """
         pass
 

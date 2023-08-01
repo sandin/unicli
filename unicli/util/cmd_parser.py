@@ -1,7 +1,11 @@
 import os
+from inspect import isfunction
 from typing import Optional
 
 from unicli.context import Context
+
+
+LAST_RESULT_VAR_NAME = "0"
 
 
 def tokenize(line: str, split_tokens: list[str], wrap_tokens: list[str], end_tokens: list[str]):
@@ -38,12 +42,53 @@ def join_args(args: list[str]):
     return s
 
 
+EXPRESSION_TOKEN = ["+", "-", "*", "/"]
+
+
 def is_expression(text: str) -> bool:
-    expression_token = ["+", "-", "*", "/"]
     for c in text:
-        if c in expression_token:
+        if c in EXPRESSION_TOKEN:
             return True
     return False
+
+
+def parse_var(var_solver, arg: str, def_val: Optional[any]) -> (str, str):
+    if type(var_solver) == dict:
+        def solver(var_name, def_val):
+            if var_name in var_solver:
+                return var_solver[var_name]
+            return def_val
+    elif isfunction(var_solver):
+        solver = var_solver
+    else:
+        raise Exception("unexpected type of var solver", type(var_solver))
+
+    ret = ""  # type: str
+    split_tokens = EXPRESSION_TOKEN + [' ']
+    var_token = "$"
+    last_var_name = None
+    for i in range(0, len(arg)):
+        c = arg[i]
+        if c == var_token:
+            last_var_name = ""
+            continue
+        if c in split_tokens:
+            if last_var_name is not None and len(last_var_name) > 0:
+                var_val = solver(last_var_name, None)
+                if var_val is None:
+                    return def_val, "use undefined local var `%s`" % arg
+                ret = ret + str(var_val)
+                last_var_name = None
+        if last_var_name is not None:
+            last_var_name += c
+        else:
+            ret += c
+    if last_var_name is not None and len(last_var_name) > 0:
+        var_val = solver(last_var_name, None)
+        if var_val is None:
+            return def_val, "use undefined local var `%s`" % arg
+        ret = ret + str(var_val)
+    return ret, None
 
 
 def is_hexadecimal(text: str) -> bool:
@@ -127,31 +172,37 @@ class Command(object):
         arg = self.args[index]
         return arg, None
 
-    def parse_var(self, arg: str, def_val: Optional[any]) -> (str, str):
-        if arg.startswith("$"):  # TODO:
-            var_name = arg[1:]
-            if var_name not in self.ctx.local_vars:
-                return def_val, "use undefined local var `%s`" % arg
-            arg = self.ctx.local_vars[var_name]
-        return arg, None
-
     def get_raw_arg(self, name: str, index: int, def_val: Optional[str]) -> (str, str):
         arg, err = self._get_arg(name, index, def_val)
         if err is not None:
             return def_val, err if err != ERR_USE_DEF else None
         return arg, err
 
+    @staticmethod
+    def parse_var_with_ctx(ctx: Context, arg: str, def_val: Optional[any]) -> (str, str):
+        def var_solver(var_name, in_def_val):
+            if var_name in ctx.local_vars:
+                return ctx.local_vars[var_name]
+            if var_name == LAST_RESULT_VAR_NAME:
+                return ctx.last_result
+            reg_num = ctx.arch.get_reg_num(var_name, -1)
+            if reg_num == -1:
+                return in_def_val
+            val, err = ctx.executor.reg_read(reg_num)
+            return hex(val) if err is None else in_def_val
+        return parse_var(var_solver, arg, def_val)
+
     def get_str_arg(self, name: str, index: int, def_val: Optional[str]) -> (str, str):
         arg, err = self._get_arg(name, index, def_val)
         if err is not None:
             return def_val, err if err != ERR_USE_DEF else None
-        return self.parse_var(arg, def_val)
+        return self.parse_var_with_ctx(self.ctx, arg, def_val)
 
     def get_file_arg(self, name: str, index: int, def_val: Optional[str]) -> (str, str):
         arg, err = self.get_str_arg(name, index, def_val)
         if err is not None:
             return def_val, err if err != ERR_USE_DEF else None
-        arg, err = self.parse_var(arg, def_val)
+        arg, err = self.parse_var_with_ctx(self.ctx, arg, def_val)
         if err is not None:
             return def_val, err
         if not os.path.exists(arg):
@@ -162,7 +213,7 @@ class Command(object):
         arg, err = self._get_arg(name, index, def_val)
         if err is not None:
             return def_val, err if err != ERR_USE_DEF else None
-        arg, err = self.parse_var(arg, def_val)
+        arg, err = self.parse_var_with_ctx(self.ctx, arg, def_val)
         if err is not None:
             return def_val, err
         addr = parse_address(arg, def_val)
@@ -174,11 +225,11 @@ class Command(object):
         arg, err = self._get_arg(name, index, def_val)
         if err is not None:
             return def_val, err if err != ERR_USE_DEF else None
-        arg, err = self.parse_var(arg, def_val)
+        arg, err = self.parse_var_with_ctx(self.ctx, arg, def_val)
         if err is not None:
             return def_val, err
         addr = parse_number(arg, def_val)
-        if addr == def_val:
+        if addr == def_val:  # TODO: bug
             return def_val, "invalid number format: `%s` = `%s`" % (name, arg)
         return addr, None
 
@@ -186,7 +237,7 @@ class Command(object):
         arg, err = self._get_arg(name, index, def_val)
         if err is not None:
             return def_val, err if err != ERR_USE_DEF else None
-        arg, err = self.parse_var(arg, def_val)
+        arg, err = self.parse_var_with_ctx(self.ctx, arg, def_val)
         if err is not None:
             return def_val, err
         data = parse_bytes(arg)

@@ -166,14 +166,14 @@ First let's map a chunk of memory and use it as stack memory.
 >>> mem_map 0x00010000 8*1024*1024
 0x0000010000 - 0x0000810000 rwx
 
->>> set sp 0x00010000+(8*1024*1024)
-set sp = 0x00010000+(8*1024*1024)
+>>> set stack_pointer 0x00010000+(8*1024*1024)
+set stack_pointer = 0x00010000+(8*1024*1024)
 ```
 
 For convenience, we save the value of the `sp` register to a local variable, then we can use it to set the register.
 
 ```
->>> reg_write all 0 sp $sp
+>>> reg_write all 0 sp $stack_pointer
  X0 => 0x0000000000000000     X1 => 0x0000000000000000    
  X2 => 0x0000000000000000     X3 => 0x0000000000000000    
  X4 => 0x0000000000000000     X5 => 0x0000000000000000    
@@ -197,7 +197,7 @@ X28 => 0x0000000000000000     FP => 0x0000000000000000
 This command actually has two steps:
 
 * step 1, `reg_write all 0`, we initialize all the registers to 0 first.
-* step 2, `reg_write sp $sp`, we set the `sp` register using the previously saved local variable, it points to the memory we just mapped.
+* step 2, `reg_write sp $stack_pointer`, we set the `sp` register using the previously saved local variable, it points to the memory we just mapped.
 
 ​                
 

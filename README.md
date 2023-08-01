@@ -91,8 +91,8 @@ Create a block of memory to be used as stack memory:
 For convenience, we can set some local variables for reuse.
 
 ```
->>> set sp 0x00010000+(8*1024*1024)
-set sp = 0x00010000+(8*1024*1024)
+>>> set stack_pointer 0x00010000+(8*1024*1024)
+set stack_pointer = 0x00010000+(8*1024*1024)
 ```
 
 ​     
@@ -102,7 +102,7 @@ set sp = 0x00010000+(8*1024*1024)
 Then we can set the value of the `sp` register and use the local variable we just created.
 
 ```bash
->>> reg_write sp $sp
+>>> reg_write sp $stack_pointer
  SP => 0x0000000000810000    
 ```
 
@@ -153,7 +153,7 @@ UniCli will prints out all executed assembly code, as well as block information,
 First let's jump to the beginning of the target function and execute the previous two assembly instructions in order to initialize the values of some registers that we will need to use later.
 
 ```
->>> reg_write all 0 sp $sp
+>>> reg_write all 0 sp $stack_pointer
 >>> emu_start 0x4061C 0x4061C+8
 Start emulation, range: 0x000004061c - 0x0000040624
 0x000004061c blk_4061c:
@@ -297,9 +297,9 @@ mem_read 0xFDC80 0x08
 
 # initialize stack & registers
 mem_map 0x00010000 8*1024*1024
-set sp 0x00010000+(8*1024*1024)
+set stack_pointer 0x00010000+(8*1024*1024)
 reg_write all 0
-reg_write sp $sp
+reg_write sp $stack_pointer
 reg_read all
 
 # patch code
@@ -318,17 +318,17 @@ hook_block 0x40800 reg_read X8
 hook_code 0x4083c mem_read 0xFBAB8 0xa
 
 # start emulation
-reg_write all 0 sp $sp x24 0xFBD50
+reg_write all 0 sp $stack_pointer x24 0xFBD50
 emu_start 0x3B98C 0x3B9A8
 mem_read 0xFB560 0x19  # "Check overlay permission"
 
 # start emulation
-reg_write all 0 sp $sp X20 0xFBD50
+reg_write all 0 sp $stack_pointer X20 0xFBD50
 emu_start 0x40674 0x406C4
 mem_read 0xFBA88 0xa # "0x4449D44"
 
 # start emulation
-reg_write all 0 sp $sp
+reg_write all 0 sp $stack_pointer
 emu_start 0x4061C 0x4061C+8  # adrp x20, #0xfb000 | add x20, x20, #0xd50
 emu_start 0x407E0 0x40844
 mem_read 0xFBAB8 0xa  # "0x4847168"
