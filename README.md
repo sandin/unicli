@@ -1,20 +1,14 @@
 # UniCli
 
+[中文文档](README_zh.md)        
+
 An interactive command line interface for unicorn.
 
 The aim of this project is to provide a handy command line tool for analyzing binary assemblies, not to implement a complete simulation environment, which many projects have proved to be impossible.
 
 This tool will allow you to focus on the subject of your analysis instead of some repetitive and boring coding.
 
-​      
-
-Dependencies:
-
-* [unicorn](https://github.com/unicorn-engine/unicorn)
-* [capstone](https://github.com/capstone-engine/capstone)
-* [LIEF](https://github.com/lief-project/LIEF)
-
-​              
+​                                                 
 
 ## Install
 
@@ -34,12 +28,11 @@ $ pip install -r requirements.txt
 
 ​                            
 
-## Getting Start
+## Example
 
-* English: [Crack string encryption using unicli](samples/decrypt_string0/README.md)
-* 中文: [使用unicli破解字符串加密算法](samples/decrypt_string1_zh/README.md)
+* [Crack string encryption using unicli](samples/decrypt_string0/README.md)
 
-​           
+​            
 
 ## Basic Usage
 
