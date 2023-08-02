@@ -7,6 +7,7 @@ from unicli.arch.arch import Arch
 from unicli.context import Context, execute_command
 from unicli.util.cmd_parser import Command
 from unicli.tracker.tracker import Tracker, StopCondition, StopConditionType
+from ..util.memory import page_start, page_align
 
 
 class UnicornExecutor(Executor):
@@ -26,6 +27,7 @@ class UnicornExecutor(Executor):
         self.all_code_hooks = []
         self._setup_hooks()
         self._exit_enabled = False
+        self._auto_map_unmapped: bool = False
 
     def _setup_hooks(self):
         self.mu.hook_add(UC_HOOK_BLOCK, self.hook_block, self)
@@ -34,8 +36,18 @@ class UnicornExecutor(Executor):
         #self._mu.hook_add(UC_HOOK_INTR, self.hook_intr, self)
 
     @staticmethod
-    def hook_mem_unmapped(self, type, address, size, value, data) -> bool:
+    def hook_mem_unmapped(self, type, address, size, value, user_data) -> bool:
+        executor = user_data  # type: UnicornExecutor
+        ctx = executor.context  # type: Context
+
         print("hook_mem_unmapped", type, hex(address), size, value)
+        if executor._auto_map_unmapped:
+            aligned_address = page_start(address)
+            aligned_size = page_align(size)
+            print("auto map memory, addr=0x%x size=%d" % (aligned_address, aligned_size))
+            ret, err = executor.mem_map(aligned_address, aligned_size, MemoryPerm.PROT_ALL)
+            if err is not None:
+                return True  # continue the execution
         return False
 
     @staticmethod
@@ -165,13 +177,14 @@ class UnicornExecutor(Executor):
         except UcError as e:
             return False, e
 
-    def emu_start(self, start_addr: int, end_addr: int, timeout: int, count: int) -> (bool, str):
+    def emu_start(self, start_addr: int, end_addr: int, timeout: int, count: int, auto_map: bool = False) -> (bool, str):
         try:
             if end_addr == 0 and self._exit_enabled is False:
                 self.mu.ctl_exits_enabled(True)
                 self._exit_enabled = True
                 if self.tracker.get_stop_condition() is None:
                     self.tracker.set_stop_condition(StopCondition(StopConditionType.ON_NEXT_INST, 0))
+            self._auto_map_unmapped = auto_map
             self.mu.emu_start(start_addr, end_addr, timeout, count)
             return True, None
         except UcError as e:

@@ -64,6 +64,7 @@ USAGE = """Usage: <command> <args..> <flags..>
     es emu_start <start_addr> <end_addr>        Start emulation
                  [<timeout> <count>]
                  [--base <address>]             Base address of <start_addr> and <end_addr>
+                 [--auto_map]                   Auto map all unmapped memory
     et emu_stop                                 Stop emulation        
     
  context:

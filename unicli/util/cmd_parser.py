@@ -165,11 +165,12 @@ class Command(object):
         return len(self.args)
 
     def _get_arg(self, name: str, index: int, def_val: Optional[any]) -> (any, str):
-        if index >= len(self.args):
+        args = list(filter(lambda a: not a.startswith("-"), self.args))
+        if index >= len(args):
             if def_val is not None:  # it's an optional arg, just use the default value
                 return def_val, ERR_USE_DEF
             return def_val, "missing <%s> arg" % name
-        arg = self.args[index]
+        arg = args[index]
         return arg, None
 
     def get_raw_arg(self, name: str, index: int, def_val: Optional[str]) -> (str, str):
@@ -253,7 +254,7 @@ class Command(object):
         return Command(self.ctx, "", cmd, args)
 
     def get_str_flag(self, names: list[str], start_index: int, def_val: Optional[str]) -> Optional[str]:
-        i = start_index
+        i = 0  # start_index
         while i < len(self.args):
             arg = self.args[i]
             if arg.startswith('-') and len(arg) >= 2:
@@ -280,8 +281,11 @@ class Command(object):
             return parse_number(flag, def_val)
         return def_val
 
+    def get_bool_flag(self, names: list[str], start_index: int, def_val: bool) -> bool:
+        return self.has_flag(names, start_index, def_val)
+
     def has_flag(self, names: list[str], start_index: int, def_val: bool) -> bool:
-        i = start_index
+        i = 0  # start_index
         while i < len(self.args):
             arg = self.args[i]
             if arg.startswith('-') and len(arg) >= 2:

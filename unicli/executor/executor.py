@@ -76,13 +76,14 @@ class Executor(object):
         """
         pass
 
-    def emu_start(self, start_addr: int, end_addr: int, timeout: int, count: int) -> (bool, str):
+    def emu_start(self, start_addr: int, end_addr: int, timeout: int, count: int, auto_map: bool = False) -> (bool, str):
         """
         Start emulation at the specified addr
         :param start_addr: address to start
         :param end_addr: address to end
         :param timeout: timeout
         :param count: count
+        :param auto_map: auto map all unmapped memory
         :return: (success, error)
         """
         pass

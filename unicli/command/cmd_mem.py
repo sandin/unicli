@@ -64,20 +64,30 @@ def cmd_mem_read(ctx: Context, cmd: Command) -> (int, str):
         err = "can not read memory at %s - %s, %s" % (start_addr_s, end_addr_s, err)
         return CMD_RESULT_FAILED, err
 
+    ret = None
     if out is not None:
         write_content_to_file(data, out)
         ret = out
         print("%s - %s %d bytes have been saved to the file: %s" % (start_addr_s, end_addr_s, len(data), out))
     else:
         if out_format == "c_string":
-            ret = data.decode()
-            print('%s "%s"' % (start_addr_s, ret))
+            try:
+                ret = data.decode()
+                print('%s "%s"' % (start_addr_s, ret))
+            except:
+                hexdump(data, off=address)
         elif out_format == "utf8_string":
-            ret = data.decode("utf-8")
-            print('%s "%s"' % (start_addr_s, ret))
+            try:
+                ret = data.decode("utf-8")
+                print('%s "%s"' % (start_addr_s, ret))
+            except:
+                hexdump(data, off=address)
         elif out_format == "utf16_string":
-            ret = data.decode("utf-16")
-            print('%s "%s"' % (start_addr_s, ret))
+            try:
+                ret = data.decode("utf-16")
+                print('%s "%s"' % (start_addr_s, ret))
+            except:
+                hexdump(data, off=address)
         else:  # format == "hex"
             ret = data
             hexdump(data, off=address)
