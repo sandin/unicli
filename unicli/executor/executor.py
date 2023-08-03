@@ -175,3 +175,12 @@ class Executor(object):
         :return: (success, error)
         """
         pass
+
+    def add_comment(self, address: int, comment: str) -> (bool, str):
+        """
+        Add comment at address
+        :param address: addr
+        :param comment: comment content
+        :return: (success, error)
+        """
+        pass

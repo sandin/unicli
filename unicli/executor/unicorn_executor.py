@@ -28,6 +28,7 @@ class UnicornExecutor(Executor):
         self._setup_hooks()
         self._exit_enabled = False
         self._auto_map_unmapped: bool = False
+        self.comments = {}
 
     def _setup_hooks(self):
         self.mu.hook_add(UC_HOOK_BLOCK, self.hook_block, self)
@@ -61,6 +62,8 @@ class UnicornExecutor(Executor):
             executor.emu_stop()
             return  # breakpoint
 
+        if executor.tracker.is_jump:
+            print("----------------------------------------------------------------")
         block_name = "blk_%x" % rel_address
         print("%s %s:" % (address_s, block_name))
 
@@ -89,18 +92,25 @@ class UnicornExecutor(Executor):
         if address in executor.code_hooks:
             hook = executor.code_hooks[address]
             if type(hook) == Command:
-                execute_command(ctx, hook)
+                ret, err = execute_command(ctx, hook)
+                if err is not None:
+                    print("Error: can not execute subcommand: %s, %s" % (hook.cmd, err))
             elif isfunction(hook):
                 hook(ctx, address, size, user_data)
 
         # disassemble code
-        executor.disasm(address, size)
+        executor.disasm(address, size, "")
+        if len(executor.comments) > 0 and address in executor.comments:
+            for comment in executor.comments[address]:
+                print("           ; %s" % comment)
+        else:
+            print("")
 
     @staticmethod
     def hook_intr(mu: unicorn.Uc, intr_num: int, user_data: any):
         print("hook_intr", intr_num)
 
-    def disasm(self, address: int, size: int) -> (bool, str):
+    def disasm(self, address: int, size: int, end=None) -> (bool, str):
         code, err = self.mem_read(address, size)
         if err is not None:
             return False, "can not read memory at 0x%x" % address
@@ -108,7 +118,7 @@ class UnicornExecutor(Executor):
         rel_address = address - self.context.base_addr
         for i in self.cs.disasm(code, rel_address, 0):
             address_s = self.context.arch.format_address(i.address, uppercase=True)
-            print("{}              {:<10s} {:<s}".format(address_s, i.mnemonic, i.op_str))
+            print("{}              {:<10s} {:<s}".format(address_s, i.mnemonic, i.op_str), end=end)
         return True, None
 
     def mem_map(self, address: int, size: int, perms: MemoryPerm) -> (int, str):
@@ -250,3 +260,10 @@ class UnicornExecutor(Executor):
             return True, None
         except UcError as e:
             return False, e
+
+    def add_comment(self, address: int, comment: str) -> (bool, str):
+        if address not in self.comments:
+            self.comments[address] = [comment]
+        else:
+            self.comments[address].append(comment)
+        return True, None

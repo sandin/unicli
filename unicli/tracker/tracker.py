@@ -46,9 +46,11 @@ class Tracker(object):
         self._stop_condition = None  # type: Optional[StopCondition]
         self._stop_inst_count = 0  # type: int
         self._stop_block_count = 0  # type: int
+        self.is_jump = False  # type: bool
 
     def on_new_block(self, address: int, size: int) -> bool:
         self._current_addr = address
+        self.is_jump = self._next_addr != 0 and self._current_addr != self._next_addr
 
         if self._should_stop_on_block(address, size):
             return False
