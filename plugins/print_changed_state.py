@@ -19,8 +19,8 @@ def hook_code(mu: unicorn.Uc, address: int, size: int, user_data: any):
         old_val = g_last_reg_values[reg_num] if reg_num in g_last_reg_values else 0
         if val != old_val:
             reg_name = ctx.arch.get_reg_name(reg_num, "")
-            prefix = "                                                       ; "
-            print("%s%3s: %s => %s    " % (prefix, reg_name, ctx.arch.format_number(old_val), ctx.arch.format_number(val)))
+            prefix = "                                                                     "
+            print("%s ; %s: %s => %s    " % (prefix, reg_name, ctx.arch.format_number(old_val), ctx.arch.format_number(val)))
         g_last_reg_values[reg_num] = val
 
 

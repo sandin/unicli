@@ -101,8 +101,9 @@ class UnicornExecutor(Executor):
         # disassemble code
         executor.disasm(address, size, "")
         if len(executor.comments) > 0 and address in executor.comments:
-            for comment in executor.comments[address]:
-                print("           ; %s" % comment)
+            for i, comment in enumerate(executor.comments[address]):
+                prefix = "                                                                     " if i > 0 else ""
+                print("%s ; %s" % (prefix, comment))
         else:
             print("")
 
@@ -118,7 +119,7 @@ class UnicornExecutor(Executor):
         rel_address = address - self.context.base_addr
         for i in self.cs.disasm(code, rel_address, 0):
             address_s = self.context.arch.format_address(i.address, uppercase=True)
-            print("{}              {:<10s} {:<s}".format(address_s, i.mnemonic, i.op_str), end=end)
+            print("{}               {:<10s} {:<31s}".format(address_s, i.mnemonic, i.op_str), end=end)
         return True, None
 
     def mem_map(self, address: int, size: int, perms: MemoryPerm) -> (int, str):
