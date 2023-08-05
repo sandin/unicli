@@ -68,6 +68,7 @@ def cmd_print_var(ctx: Context, cmd: Command) -> (int, str):
     ctx.last_result = value
     return CMD_RESULT_OK, None
 
+
 def cmd_set_base(ctx: Context, cmd: Command) -> (int, str):
     address, err = cmd.get_addr_arg("addr", 0, -1)
     if err is not None:
@@ -98,6 +99,7 @@ def cmd_disasm(ctx: Context, cmd: Command) -> (int, str):
     if err is not None:
         err = "can not disassemble code at 0x%x - 0x%x, %s" % (address, address + size, err)
         return CMD_RESULT_FAILED, err
+    print(ret)
     ctx.last_result = ret
     return CMD_RESULT_OK, None
 

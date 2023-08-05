@@ -4,6 +4,7 @@ from prompt_toolkit import PromptSession
 
 from .__init__ import __version__
 from .command import CMD_RESULT_EXIT, CMD_RESULT_FAILED
+from .command.cmd_cfg import cmd_cfg_save
 from .command.cmd_ctx import cmd_ctx_save, cmd_ctx_restore, cmd_ctx_delete
 from .command.cmd_hook import cmd_hook_block, cmd_hook_code
 from .command.cmd_emu import cmd_emu_start, cmd_emu_stop
@@ -77,6 +78,11 @@ USAGE = """Usage: <command> <args..> <flags..>
     si step_inst                                Step to the next inst
     sb step_block                               Step to the next block
     st step_to <rel_addr>                       Step to the address
+    
+ cfg:
+    gs cfg_save <addr>                          Save CFG starting at the address to file
+                --out <output_dir>              output directory name
+                [--format <format>]             File format: dot
 """
 
 CMDS = {}
@@ -110,6 +116,7 @@ register_cmd(CMDS, "step_to", "st", handler=cmd_step_address)
 register_cmd(CMDS, "cs", "ctx_save", handler=cmd_ctx_save)
 register_cmd(CMDS, "cr", "ctx_restore", handler=cmd_ctx_restore)
 register_cmd(CMDS, "cd", "ctx_del", handler=cmd_ctx_delete)
+register_cmd(CMDS, "gs", "cfg_save", handler=cmd_cfg_save)
 
 
 def main():

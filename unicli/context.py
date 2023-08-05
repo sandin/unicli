@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from unicli.arch.arch import ArchSpec
 from unicli.executor.executor import Executor
 from unicli.loader.loader import Loader, LoadedInfo
+from unicli.tracker.tracker import Tracker
 from unicli.util.file_format import FileFormat
 
 
@@ -18,6 +19,7 @@ class Context:
     commands: dict[str, any] = field(default_factory=dict)
     usage: str = None
     executor: Optional[Executor] = None
+    tracker: Tracker = None
     saved_context: dict[str, any] = field(default_factory=dict)
     loader: dict[FileFormat, Loader] = field(default_factory=dict)
     loaded: list[LoadedInfo] = field(default_factory=list)

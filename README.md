@@ -1,4 +1,4 @@
-# UniCli
+# Unicli
 
 [中文文档](README_zh.md)        
 
@@ -8,7 +8,47 @@ The aim of this project is to provide a handy command line tool for analyzing bi
 
 This tool will allow you to focus on the subject of your analysis instead of some repetitive and boring coding.
 
-​                                                 
+​                                  
+
+**Unicli focuses on the process of simulation execution.** You can examine the realtime context including memory and registers at any time during the simulation execution. It will print all the details in the process, including the changed register values, and you can export the execution as a CFG image file.
+
+```
+>>> emu_start 0x152D24 0x152D9C --auto_map
+0x0000152D24 blk_152d24:
+                                                                      ; X0: 0x0000000000000000 => 0x0000000010000000    
+                                                                      ; X1: 0x0000000000000000 => 0x0000000010001000    
+                                                                      ; SP: 0x0000000000000000 => 0x000000000180ff00    
+0x0000152D24               sub        sp, sp, #0x70                  
+                                                                      ; SP: 0x000000000180ff00 => 0x000000000180fe90    
+0x0000152D28               stp        x28, x27, [sp, #0x10]          
+0x0000152D2C               stp        x26, x25, [sp, #0x20]          
+0x0000152D30               stp        x24, x23, [sp, #0x30]          
+0x0000152D34               stp        x22, x21, [sp, #0x40]          
+0x0000152D38               stp        x20, x19, [sp, #0x50]          
+0x0000152D3C               stp        x29, x30, [sp, #0x60]          
+0x0000152D40               add        x29, sp, #0x60                 
+                                                                      ; FP: 0x0000000000000000 => 0x000000000180fef0    
+0x0000152D44               mov        w8, #0x4655                    
+                                                                      ; X8: 0x0000000000000000 => 0x0000000000004655    
+0x0000152D48               mov        w9, #0x7270                    
+                                                                      ; X9: 0x0000000000000000 => 0x0000000000007270    
+0x0000152D4C               movk       w8, #0xdbb4, lsl #16           
+                                                                      ; X8: 0x0000000000004655 => 0x00000000dbb44655    
+0x0000152D50               movk       w9, #0x870e, lsl #16           
+                                                                      ; X9: 0x0000000000007270 => 0x00000000870e7270    
+0x0000152D54               add        w10, w8, #5                    
+                                                                      ; X10: 0x0000000000000000 => 0x00000000dbb4465a    
+0x0000152D58               orr        w11, w9, #0xe                  
+```
+
+
+CFG:
+
+
+
+![screenshot_cfg](docs/images/screenshot_cfg.png)                                                 
+
+​        
 
 ## Install
 

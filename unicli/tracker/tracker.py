@@ -1,24 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Optional
 from enum import IntEnum
-
-
-@dataclass
-class Instruction:
-    address: int = 0
-    size: int = 0
-
-
-@dataclass()
-class BasicBlock:
-    start_addr: int = 0
-    end_addr: int = 0
-    predecessor: set[any] = field(default_factory=set)
-    successor: any = None
-    instructions: list[Instruction] = field(default_factory=list)
-
-    def __hash__(self):
-        return self.start_addr
+from unicli.tracker.basic_block import BasicBlock, Instruction
 
 
 class StopConditionType(IntEnum):
@@ -48,7 +31,22 @@ class Tracker(object):
         self._stop_block_count = 0  # type: int
         self.is_jump = False  # type: bool
 
-    def on_new_block(self, address: int, size: int) -> bool:
+    def find_block(self, start_addr):
+        return Tracker._find_block(self._head_block, start_addr)
+
+    @staticmethod
+    def _find_block(block, start_addr):
+        if block is None:
+            return None
+        if block.start_addr == start_addr:
+            return block
+        for succ in block.successors:
+            found = Tracker._find_block(succ, start_addr)
+            if found:
+                return found
+        return None
+
+    def on_new_block(self, address: int, size: int, name: str) -> bool:
         self._current_addr = address
         self.is_jump = self._next_addr != 0 and self._current_addr != self._next_addr
 
@@ -56,7 +54,7 @@ class Tracker(object):
             return False
 
         if address not in self._blocks:
-            blk = BasicBlock(start_addr=address)
+            blk = BasicBlock(start_addr=address, name=name)
         else:
             blk = self._blocks[address]
         if self._head_block is None:
@@ -64,12 +62,12 @@ class Tracker(object):
         if self._tail_block is None:
             self._tail_block = blk
         else:
-            blk.predecessor.add(self._tail_block)
-            self._tail_block.successor = blk
+            blk.predecessors.add(self._tail_block)
+            self._tail_block.successors.add(blk)
             self._tail_block = blk
         return True  # continue
 
-    def on_new_inst(self, address: int, size: int) -> bool:
+    def on_new_inst(self, address: int, size: int, inst: str) -> bool:
         if self._start_addr == 0:
             self._start_addr = address
         self._last_addr = self._current_addr
@@ -80,7 +78,7 @@ class Tracker(object):
             return False
 
         if self._tail_block is not None:
-            self._tail_block.instructions.append(Instruction(address, size))
+            self._tail_block.instructions.append(Instruction(address, size, inst))
         return True  # continue
 
     def _should_stop_on_block(self, address, size):

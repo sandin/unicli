@@ -134,3 +134,5 @@ dmypy.json
 /init_script
 
 /*.bin
+
+/cfg/

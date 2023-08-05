@@ -11,7 +11,7 @@ from ..util.memory import page_start, page_align
 
 
 class UnicornExecutor(Executor):
-    MIN_ADDR = 0x01000000
+    MIN_ADDR = 0x00000000
 
     def __init__(self, ctx: Context, arch: Arch):
         Executor.__init__(self)
@@ -21,7 +21,6 @@ class UnicornExecutor(Executor):
             self.cs = Cs(CS_ARCH_ARM64, CS_MODE_ARM)  # type: Cs
         else:
             raise Exception("Unsupported arch")
-        self.tracker = Tracker()
         self.block_hooks = {}
         self.code_hooks = {}
         self.all_code_hooks = []
@@ -57,14 +56,14 @@ class UnicornExecutor(Executor):
         ctx = executor.context  # type: Context
         rel_address = address - ctx.base_addr  # TODO: the base address of the current module
         address_s = ctx.arch.format_address(rel_address, uppercase=True)
+        block_name = "blk_%x" % rel_address
 
-        if not executor.tracker.on_new_block(address, size):
+        if not ctx.tracker.on_new_block(address, size, block_name):
             executor.emu_stop()
             return  # breakpoint
 
-        if executor.tracker.is_jump:
+        if ctx.tracker.is_jump:
             print("----------------------------------------------------------------")
-        block_name = "blk_%x" % rel_address
         print("%s %s:" % (address_s, block_name))
 
         # user's hooks
@@ -80,7 +79,10 @@ class UnicornExecutor(Executor):
         executor = user_data  # type: UnicornExecutor
         ctx = executor.context  # type: Context
 
-        if not executor.tracker.on_new_inst(address, size):
+        # disassemble code
+        asm, err = executor.disasm(address, size)
+
+        if not ctx.tracker.on_new_inst(address, size, asm):
             executor.emu_stop()
             return  # breakpoint
 
@@ -98,8 +100,7 @@ class UnicornExecutor(Executor):
             elif isfunction(hook):
                 hook(ctx, address, size, user_data)
 
-        # disassemble code
-        executor.disasm(address, size, "")
+        print(asm, end="")
         if len(executor.comments) > 0 and address in executor.comments:
             for i, comment in enumerate(executor.comments[address]):
                 prefix = "                                                                     " if i > 0 else ""
@@ -111,16 +112,21 @@ class UnicornExecutor(Executor):
     def hook_intr(mu: unicorn.Uc, intr_num: int, user_data: any):
         print("hook_intr", intr_num)
 
-    def disasm(self, address: int, size: int, end=None) -> (bool, str):
+    def disasm(self, address: int, size: int) -> (str, str):
         code, err = self.mem_read(address, size)
         if err is not None:
             return False, "can not read memory at 0x%x" % address
 
         rel_address = address - self.context.base_addr
-        for i in self.cs.disasm(code, rel_address, 0):
-            address_s = self.context.arch.format_address(i.address, uppercase=True)
-            print("{}               {:<10s} {:<31s}".format(address_s, i.mnemonic, i.op_str), end=end)
-        return True, None
+        ret = ""
+        i = 0
+        for inst in self.cs.disasm(code, rel_address, 0):
+            address_s = self.context.arch.format_address(inst.address, uppercase=True)
+            if i > 0:
+                ret += "\n"
+            ret += "{}               {:<10s} {:<31s}".format(address_s, inst.mnemonic, inst.op_str)
+            i += 1
+        return ret, None
 
     def mem_map(self, address: int, size: int, perms: MemoryPerm) -> (int, str):
         try:
@@ -193,8 +199,8 @@ class UnicornExecutor(Executor):
             if end_addr == 0 and self._exit_enabled is False:
                 self.mu.ctl_exits_enabled(True)
                 self._exit_enabled = True
-                if self.tracker.get_stop_condition() is None:
-                    self.tracker.set_stop_condition(StopCondition(StopConditionType.ON_NEXT_INST, 0))
+                if self.context.tracker.get_stop_condition() is None:
+                    self.context.tracker.set_stop_condition(StopCondition(StopConditionType.ON_NEXT_INST, 0))
             self._auto_map_unmapped = auto_map
             self.mu.emu_start(start_addr, end_addr, timeout, count)
             return True, None
@@ -206,7 +212,7 @@ class UnicornExecutor(Executor):
             self.mu.emu_stop()
             self.mu.ctl_exits_enabled(False)
             self._exit_enabled = False
-            self.tracker.set_stop_condition(None)
+            self.context.tracker.set_stop_condition(None)
             return True, None
         except UcError as e:
             return False, e
@@ -237,16 +243,16 @@ class UnicornExecutor(Executor):
         return True, None
 
     def step_inst(self) -> (bool, str):
-        self.tracker.set_stop_condition(StopCondition(StopConditionType.ON_NEXT_INST, 0))
-        return self.emu_start(self.tracker.get_next_address(), 0, 0, 0)
+        self.context.tracker.set_stop_condition(StopCondition(StopConditionType.ON_NEXT_INST, 0))
+        return self.emu_start(self.context.tracker.get_next_address(), 0, 0, 0)
 
     def step_block(self) -> (bool, str):
-        self.tracker.set_stop_condition(StopCondition(StopConditionType.ON_NEXT_BLOCK, 0))
-        return self.emu_start(self.tracker.get_next_address(), 0, 0, 0)
+        self.context.tracker.set_stop_condition(StopCondition(StopConditionType.ON_NEXT_BLOCK, 0))
+        return self.emu_start(self.context.tracker.get_next_address(), 0, 0, 0)
 
     def step_address(self, address: int) -> (bool, str):
-        self.tracker.set_stop_condition(StopCondition(StopConditionType.ON_ADDRESS, address))
-        return self.emu_start(self.tracker.get_next_address(), 0, 0, 0)
+        self.context.tracker.set_stop_condition(StopCondition(StopConditionType.ON_ADDRESS, address))
+        return self.emu_start(self.context.tracker.get_next_address(), 0, 0, 0)
 
     def ctx_save(self, name: str) -> (any, str):
         try:

@@ -9,7 +9,8 @@ from unicli.util.cmd_parser import Command
 from unicli.executor.unicorn_executor import UnicornExecutor
 from unicli.arch.arch_arm64 import ArchSpecArm64
 from unicli.loader.loader import LoadedInfo
-from ..loader.raw_loader import RawLoader
+from unicli.loader.raw_loader import RawLoader
+from unicli.tracker.tracker import Tracker
 
 
 def _set_current_loaded_info(ctx: Context, loaded_info: Optional[LoadedInfo]):
@@ -67,6 +68,10 @@ def cmd_load(ctx: Context, cmd: Command) -> (int, str):
         if ctx.arch.arch() != arch:
             return CMD_RESULT_FAILED, "can't load files from %s arch file, current arch is %s" \
                                   % (cpu_arch_to_str(arch), cpu_arch_to_str(ctx.arch.arch()))
+
+    # Create Tracer
+    if ctx.tracker is None:
+        ctx.tracker = Tracker()
 
     # Create Executor
     if ctx.executor is None:

@@ -1,6 +1,6 @@
 import sys
 from unicli.command import CMD_RESULT_FAILED, CMD_RESULT_OK
-from unicli.context import Context, State, state_is_loaded
+from unicli.context import Context, state_is_loaded
 from unicli.util.cmd_parser import Command
 
 
