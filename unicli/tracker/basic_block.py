@@ -18,4 +18,9 @@ class BasicBlock:
     instructions: list[Instruction] = field(default_factory=list)
 
     def __hash__(self):
-        return self.start_addr
+        return hash(self.start_addr)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.start_addr == other.start_addr
+        return False

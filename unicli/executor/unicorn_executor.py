@@ -28,6 +28,7 @@ class UnicornExecutor(Executor):
         self._exit_enabled = False
         self._auto_map_unmapped: bool = False
         self.comments = {}
+        self.block_comments = {}
 
     def _setup_hooks(self):
         self.mu.hook_add(UC_HOOK_BLOCK, self.hook_block, self)
@@ -57,6 +58,12 @@ class UnicornExecutor(Executor):
         rel_address = address - ctx.base_addr  # TODO: the base address of the current module
         address_s = ctx.arch.format_address(rel_address, uppercase=True)
         block_name = "blk_%x" % rel_address
+        if len(executor.block_comments) > 0 and address in executor.block_comments:
+            for i, comment in enumerate(executor.block_comments[address]):
+                if i > 0:
+                    block_name += "\n"
+                prefix = " " if i == 0 else ""
+                block_name += "%s%s" % (prefix, comment)
 
         if not ctx.tracker.on_new_block(address, size, block_name):
             executor.emu_stop()
@@ -100,13 +107,13 @@ class UnicornExecutor(Executor):
             elif isfunction(hook):
                 hook(ctx, address, size, user_data)
 
-        print(asm, end="")
         if len(executor.comments) > 0 and address in executor.comments:
             for i, comment in enumerate(executor.comments[address]):
+                if i > 0:
+                    asm += "\n"
                 prefix = "                                                                     " if i > 0 else ""
-                print("%s ; %s" % (prefix, comment))
-        else:
-            print("")
+                asm += "%s ; %s" % (prefix, comment)
+        print(asm, end=None)
 
     @staticmethod
     def hook_intr(mu: unicorn.Uc, intr_num: int, user_data: any):
@@ -273,4 +280,11 @@ class UnicornExecutor(Executor):
             self.comments[address] = [comment]
         else:
             self.comments[address].append(comment)
+        return True, None
+
+    def add_block_comment(self, address: int, comment: str) -> (bool, str):
+        if address not in self.block_comments:
+            self.block_comments[address] = [comment]
+        else:
+            self.block_comments[address].append(comment)
         return True, None

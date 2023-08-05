@@ -125,6 +125,27 @@ def cmd_comment(ctx: Context, cmd: Command) -> (int, str):
     return CMD_RESULT_OK, None
 
 
+def cmd_block_comment(ctx: Context, cmd: Command) -> (int, str):
+    if not state_is_loaded(ctx.state):
+        return CMD_RESULT_FAILED, "invalid context state"
+
+    address, err = cmd.get_addr_arg("addr", 0, -1)
+    if err is not None:
+        return CMD_RESULT_FAILED, err
+
+    comment = " ".join(cmd.get_raw().split(" ")[2:])
+
+    # --base <addr>
+    base_addr = cmd.get_addr_flag(["b", "base"], 2, ctx.base_addr)
+
+    ret, err = ctx.executor.add_block_comment(base_addr + address, comment)
+    if err is not None:
+        err = "can not add block comment at 0x%x, %s" % (address, err)
+        return CMD_RESULT_FAILED, err
+    ctx.last_result = ret
+    return CMD_RESULT_OK, None
+
+
 def cmd_run_expr(ctx: Context, cmd: Command) -> (int, str):
     expr = cmd.get_raw()[len(cmd.cmd):]
     if not expr:
