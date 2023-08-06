@@ -67,7 +67,7 @@ class Tracker(object):
             self._tail_block = blk
         return True  # continue
 
-    def on_new_inst(self, address: int, size: int, inst: str) -> bool:
+    def on_new_inst(self, address: int, size: int, inst: str, comment: str) -> bool:
         if self._start_addr == 0:
             self._start_addr = address
         self._last_addr = self._current_addr
@@ -78,7 +78,7 @@ class Tracker(object):
             return False
 
         if self._tail_block is not None:
-            self._tail_block.instructions.append(Instruction(address, size, inst))
+            self._tail_block.instructions.append(Instruction(address, size, inst, comment))
         return True  # continue
 
     def _should_stop_on_block(self, address, size):

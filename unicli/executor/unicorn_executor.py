@@ -1,5 +1,6 @@
 from inspect import isfunction
-
+from prompt_toolkit import print_formatted_text
+from prompt_toolkit.formatted_text import FormattedText
 from .executor import Executor, MemoryPerm
 from unicorn import *
 from capstone import *
@@ -7,7 +8,7 @@ from unicli.arch.arch import Arch
 from unicli.context import Context, execute_command
 from unicli.util.cmd_parser import Command
 from unicli.tracker.tracker import Tracker, StopCondition, StopConditionType
-from ..util.memory import page_start, page_align
+from unicli.util.memory import page_start, page_align
 
 
 class UnicornExecutor(Executor):
@@ -82,14 +83,27 @@ class UnicornExecutor(Executor):
                 hook(ctx, address, size, user_data)
 
     @staticmethod
+    def get_comment_at_address(executor, address: int):
+        if len(executor.comments) > 0 and address in executor.comments:
+            comments = ""
+            for i, comment in enumerate(executor.comments[address]):
+                if i > 0:
+                    comments += "\n"
+                prefix = "                                                                     " if i > 0 else ""
+                comments += "%s ; %s" % (prefix, comment)
+            return comments
+        return None
+
+    @staticmethod
     def hook_code(mu: unicorn.Uc, address: int, size: int, user_data: any):
         executor = user_data  # type: UnicornExecutor
         ctx = executor.context  # type: Context
+        comment = executor.get_comment_at_address(executor, address)
 
         # disassemble code
         asm, err = executor.disasm(address, size)
 
-        if not ctx.tracker.on_new_inst(address, size, asm):
+        if not ctx.tracker.on_new_inst(address, size, asm, comment):
             executor.emu_stop()
             return  # breakpoint
 
@@ -107,13 +121,15 @@ class UnicornExecutor(Executor):
             elif isfunction(hook):
                 hook(ctx, address, size, user_data)
 
-        if len(executor.comments) > 0 and address in executor.comments:
-            for i, comment in enumerate(executor.comments[address]):
-                if i > 0:
-                    asm += "\n"
-                prefix = "                                                                     " if i > 0 else ""
-                asm += "%s ; %s" % (prefix, comment)
-        print(asm, end=None)
+        # print asm with comment
+        if comment is not None:
+            print(asm, end="")
+            if ctx.colorful:
+                print_formatted_text(FormattedText([('#ff0000', comment)]))
+            else:
+                print(comment)
+        else:
+            print(asm)
 
     @staticmethod
     def hook_intr(mu: unicorn.Uc, intr_num: int, user_data: any):

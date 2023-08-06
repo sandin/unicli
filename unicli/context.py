@@ -30,6 +30,7 @@ class Context:
     prompt: str = ">>>"
     local_vars: dict[str, str] = field(default_factory=dict)
     last_result: any = None
+    colorful: bool = True
 
 
 def execute_command(ctx: Context, command) -> (int, str):

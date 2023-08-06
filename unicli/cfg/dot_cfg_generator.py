@@ -1,3 +1,4 @@
+import html
 from unicli.cfg.cfg_generator import CfgGenerator
 from unicli.tracker.basic_block import BasicBlock
 
@@ -11,7 +12,8 @@ GRAPH_TEMPLATE = """digraph G {{
 }}
 """
 
-INST_TEMPLATE = """{asm}<br align="left"/>\n"""
+NORMAL_INST_TEMPLATE = """{asm}<br align="left"/>\n"""
+HIGHLIGHT_INST_TEMPLATE = """<font color="red">{asm}</font><br align="left"/>\n"""
 
 NORMAL_BLOCK_TEMPLATE = """
     {block_name} [label=<
@@ -41,8 +43,6 @@ class DotCfgGenerator(CfgGenerator):
             return False, "Can not generate blocks of cfg"
 
         edges_txt = self._generate_edges(blocks)
-        if not edges_txt:
-            return False, "Can not generate blocks of cfg"
 
         content = GRAPH_TEMPLATE.format(blocks=blocks_txt, edges=edges_txt)
         return content, None
@@ -73,7 +73,10 @@ class DotCfgGenerator(CfgGenerator):
     def _generate_block(bb: BasicBlock, highlight=False):
         insts = ""
         for inst in bb.instructions:
-            insts += INST_TEMPLATE.format(asm=inst.inst)
+            if inst.comment is not None:
+                insts += HIGHLIGHT_INST_TEMPLATE.format(asm=inst.inst + html.escape(inst.comment).replace("|", "\\|"))
+            else:
+                insts += NORMAL_INST_TEMPLATE.format(asm=inst.inst)
         insts = insts[:-1]  # remove the last \n
         if highlight:
             return HIGHLIGHT_BLOCK_TEMPLATE.format(block_name=bb.name.replace(" ", ""), insts=insts)

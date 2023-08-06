@@ -6,6 +6,7 @@ class Instruction:
     address: int = 0
     size: int = 0
     inst: str = None
+    comment: str = None
 
 
 @dataclass()
