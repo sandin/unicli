@@ -7,7 +7,7 @@ def cmd_ctx_save(ctx: Context, cmd: Command) -> (int, str):
     if not state_is_loaded(ctx.state):
         return CMD_RESULT_FAILED, "invalid context state"
 
-    name, err = cmd.get_str_arg("name", 2, "last_context")
+    name, err = cmd.get_str_arg("name", 0, "last_context")
     if err is not None:
         return CMD_RESULT_FAILED, err
 
@@ -23,7 +23,7 @@ def cmd_ctx_restore(ctx: Context, cmd: Command) -> (int, str):
     if not state_is_loaded(ctx.state):
         return CMD_RESULT_FAILED, "invalid context state"
 
-    name, err = cmd.get_str_arg("name", 2, "last_context")
+    name, err = cmd.get_str_arg("name", 0, "last_context")
     if err is not None:
         return CMD_RESULT_FAILED, err
 
@@ -42,7 +42,7 @@ def cmd_ctx_delete(ctx: Context, cmd: Command) -> (int, str):
     if not state_is_loaded(ctx.state):
         return CMD_RESULT_FAILED, "invalid context state"
 
-    name, err = cmd.get_str_arg("name", 2, "last_context")
+    name, err = cmd.get_str_arg("name", 0, "last_context")
     if err is not None:
         return CMD_RESULT_FAILED, err
 
