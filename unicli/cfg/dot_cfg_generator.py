@@ -53,9 +53,11 @@ class DotCfgGenerator(CfgGenerator):
             blocks.add(bb)
         if include_preds:
             for pred in bb.predecessors:
-                DotCfgGenerator._get_blocks(pred, blocks)
+                if pred not in blocks:
+                    DotCfgGenerator._get_blocks(pred, blocks)
         for succ in bb.successors:
-            DotCfgGenerator._get_blocks(succ, blocks)
+            if succ not in blocks:
+                DotCfgGenerator._get_blocks(succ, blocks)
 
     @staticmethod
     def _generate_blocks(all_blocks: set[BasicBlock], highlight_blocks: list[BasicBlock]):
